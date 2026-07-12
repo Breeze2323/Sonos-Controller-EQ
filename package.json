@@ -1,0 +1,16 @@
+{
+  "name": "sonos-controller-eq-foundation",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Foundation contracts and validation for a Sonos control plane with source-side DSP",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "lint": "node scripts/lint.mjs",
+    "test": "node --test",
+    "build": "node scripts/verify-structure.mjs",
+    "check": "npm run lint && npm test && npm run build"
+  }
+}
