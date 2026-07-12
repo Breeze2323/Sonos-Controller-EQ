@@ -1,0 +1,17 @@
+node_modules/
+dist/
+coverage/
+*.log
+*.tmp
+*.bak
+.env
+.env.*
+!.env.example
+sonos-data.json
+runtime/
+artifacts/
+reports/local-*.json
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
