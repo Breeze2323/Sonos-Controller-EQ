@@ -7,17 +7,34 @@ origin   -> Breeze2323/Sonos-Controller-EQ
 upstream -> tonypest0/sonos-controller
 ```
 
-This repository is independent rather than a GitHub-native fork. It can still share Git ancestry after the upstream framework is imported.
+This repository is independent rather than a GitHub-native fork. It can still preserve both histories by merging the upstream framework into a focused integration branch with `--allow-unrelated-histories`, resolving conflicts explicitly, and retaining attribution.
+
+## Current integration state
+
+- `main` contains the project-specific architecture, safety, test, CI, and DSP foundation.
+- The complete upstream React/Vite/Node application has not yet been imported.
+- The initial Codex branch is `agent/project-foundation-audio-path-feasibility`.
 
 ## Import policy
 
 - Verify the exact upstream commit and license.
-- Preserve commit history when practical.
+- Preserve both existing repository work and upstream history.
 - Retain CC BY-NC 4.0 attribution and notices.
 - Record project-specific changes in the changelog.
-- Do not overwrite existing repository work.
+- Never reset this repository to upstream or overwrite the foundation.
 
-## Sync procedure
+## Initial import procedure
+
+1. Add `upstream` and fetch `upstream/main`.
+2. Inspect commits newer than the recorded planning reference.
+3. Work only on `agent/project-foundation-audio-path-feasibility`.
+4. Merge the selected upstream commit with `--allow-unrelated-histories`.
+5. Resolve README, license, package/tooling, installer, server, and source conflicts by preserving both valid systems.
+6. Keep `server.js` as the compatibility entry point.
+7. Run the complete local gate.
+8. Publish the integration through a draft PR to `main`.
+
+## Ongoing sync procedure
 
 1. Fetch `upstream`.
 2. Inspect new commits and diff.
