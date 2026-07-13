@@ -5,6 +5,7 @@ import path from 'node:path'
 import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
 import test from 'node:test'
 import { createControllerServer } from '../../server/controller.js'
+import { HttpSonosAdapter } from '../../server/services/sonos/HttpSonosAdapter.js'
 
 async function listen(server) { await new Promise(resolve => server.listen(0, '127.0.0.1', resolve)); return server.address().port }
 async function request(port, route) { const response = await fetch(`http://127.0.0.1:${port}${route}`); return { status: response.status, body: await response.text() } }
@@ -35,4 +36,13 @@ test('store rejects malformed and oversized input while preserving valid data at
   const saved = await fetch(`http://127.0.0.1:${port}/sonos-store`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ 'sonos-config': { host: '127.0.0.1', port: '5005', room: 'Fixture Room' } }) })
   assert.equal(saved.status, 200)
   const value = JSON.parse(await readFile(dataFile, 'utf8')); assert.equal(value.retained, true); assert.equal(value['sonos-config'].host, '127.0.0.1')
+})
+
+test('scoped Sonos and DSP routes expose policy-blocked writes', async t => {
+  const server = createControllerServer({ sonosAdapter: new HttpSonosAdapter() })
+  const port = await listen(server); t.after(() => server.close())
+  const sonos = await fetch(`http://127.0.0.1:${port}/api/sonos/settings/apply`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ roomId: 'Fixture', settings: { loudness: true } }) })
+  assert.equal((await sonos.json()).status, 'blocked')
+  const dsp = await fetch(`http://127.0.0.1:${port}/api/dsp/validate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ schemaVersion: 1, enabled: true, preampDb: -3, graphicEq: { bands: [] }, parametricEq: { filters: [] } }) })
+  assert.equal((await dsp.json()).ok, true)
 })
