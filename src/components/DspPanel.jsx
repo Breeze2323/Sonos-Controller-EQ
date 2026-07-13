@@ -16,6 +16,8 @@ export default function DspPanel() {
   const [configuration, setConfiguration] = useState(initialConfiguration)
   const [mode, setMode] = useState(15)
   const [result, setResult] = useState(null)
+  const [rewText, setRewText] = useState('')
+  const [rewPreview, setRewPreview] = useState(null)
   const response = useMemo(() => estimateResponse(configuration), [configuration])
   const headroom = useMemo(() => assessHeadroom(configuration), [configuration])
 
@@ -27,6 +29,12 @@ export default function DspPanel() {
   const stage = async () => setResult(await post('/api/dsp/stage', configuration))
   const applySandbox = async () => setResult(await post('/api/dsp/apply', configuration))
   const toggleBypass = async () => setResult(await post('/api/dsp/bypass', { enabled: configuration.enabled }))
+  const previewRew = async () => setRewPreview(await post('/api/rew/parse', { text: rewText }))
+  const importRewDraft = () => {
+    if (!rewPreview?.ok) return
+    setConfiguration((current) => ({ ...current, preampDb: rewPreview.preampDb ?? current.preampDb, parametricEq: { filters: rewPreview.filters } }))
+    setResult({ ok: true, importedToDraft: true, applied: false, liveAudioProcessed: false, importHash: rewPreview.importHash })
+  }
 
   return (
     <section className="settings-page" aria-label="DSP equalizer">
@@ -44,6 +52,15 @@ export default function DspPanel() {
           <div role="img" aria-label="Estimated EQ response" style={{ display: 'flex', alignItems: 'end', height: 76, gap: 2, borderBottom: '1px solid var(--border)' }}>{response.points.map((point) => <span key={point.frequencyHz} title={`${point.frequencyHz} Hz: ${point.magnitudeDb.toFixed(1)} dB`} style={{ flex: 1, height: `${Math.min(100, Math.abs(point.magnitudeDb) * 7 + 2)}%`, background: point.magnitudeDb >= 0 ? 'var(--accent-primary)' : 'var(--text-muted)', opacity: 0.75 }} />)}</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button className="btn btn-secondary" onClick={stage}>Stage safely</button><button className="btn btn-primary" onClick={applySandbox}>Apply to sandbox/mock</button><button className="btn btn-secondary" onClick={toggleBypass}>Bypass sandbox/mock</button></div>
           {result && <pre style={{ whiteSpace: 'pre-wrap', fontSize: 11, margin: 0 }}>{JSON.stringify(result, null, 2)}</pre>}
+        </div>
+      </div>
+      <div className="settings-section">
+        <div className="settings-section-title">REW filter import</div>
+        <div className="settings-card" style={{ gap: 10 }}>
+          <div style={{ color: 'var(--text-secondary)', fontSize: 12 }}>Paste a REW Equalizer APO filter export to validate and preview it. Importing changes only this local draft.</div>
+          <textarea aria-label="REW filter text" value={rewText} onChange={(event) => setRewText(event.target.value)} placeholder={'Preamp: -4 dB\nFilter 1: ON PK Fc 100 Hz Gain 3 dB Q 1.4'} rows={5} style={{ width: '100%', resize: 'vertical' }} />
+          <div style={{ display: 'flex', gap: 8 }}><button className="btn btn-secondary" onClick={previewRew}>Preview REW filters</button><button className="btn btn-primary" disabled={!rewPreview?.ok} onClick={importRewDraft}>Import into draft</button></div>
+          {rewPreview && <div aria-live="polite" style={{ fontSize: 12 }}>{rewPreview.ok ? `${rewPreview.filters.length} filters validated; hash ${rewPreview.importHash.slice(0, 12)}…` : rewPreview.errors?.map((error) => `Line ${error.line}: ${error.message}`).join('; ')}</div>}
         </div>
       </div>
     </section>
