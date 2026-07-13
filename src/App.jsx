@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History } from 'lucide-react'
+import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History, SlidersHorizontal } from 'lucide-react'
 
 import { useProfiles } from './hooks/useProfiles'
 import { useSonosApi } from './hooks/useSonosApi'
@@ -16,6 +16,7 @@ import ProfileEditor from './components/ProfileEditor'
 import Scheduler from './components/Scheduler'
 import ConnectionConfig from './components/ConnectionConfig'
 import ActivityLog from './components/ActivityLog'
+import DspPanel from './components/DspPanel'
 
 // ===== Toast System =====
 let toastIdCounter = 0
@@ -470,6 +471,8 @@ export default function App() {
           />
         )}
 
+        {tab === 'dsp' && <DspPanel />}
+
         {/* Activity Log Tab */}
         {tab === 'log' && (
           <ActivityLog entries={logEntries} onClear={clearLog} />
@@ -572,6 +575,13 @@ export default function App() {
         >
           <Calendar size={22} />
           <span className="nav-tab-label">Schedule</span>
+        </button>
+        <button
+          className={`nav-tab ${tab === 'dsp' ? 'active' : ''}`}
+          onClick={() => setTab('dsp')}
+        >
+          <SlidersHorizontal size={22} />
+          <span className="nav-tab-label">DSP</span>
         </button>
         <button
           className={`nav-tab ${tab === 'log' ? 'active' : ''}`}
