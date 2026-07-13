@@ -1,24 +1,35 @@
 {
-  "name": "sonos-arc-controller",
-  "version": "1.3.0",
-  "description": "Local web app for controlling Sonos speakers with audio profiles, scheduling, and session detection",
-  "keywords": ["sonos", "arc", "audio", "controller", "home-audio"],
+  "name": "sonos-controller-eq",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Safety-bounded Sonos controller and source-DSP control plane",
   "license": "CC-BY-NC-4.0",
   "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "start": "node server.js"
+    "start": "node server.js",
+    "lint": "eslint .",
+    "test": "node --test",
+    "secret-scan": "node scripts/secret-scan.mjs",
+    "check": "npm run lint && npm test && npm run build && npm run secret-scan"
   },
   "dependencies": {
     "lucide-react": "^0.468.0",
-    "node-sonos-http-api": "*",
+    "node-sonos-http-api": "https://github.com/jishi/node-sonos-http-api/archive/3776f0ee2261c924c7b7204de121a38100a08ca7.tar.gz",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "eslint": "^10.7.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.7.0",
     "vite": "^6.4.2"
   },
   "overrides": {

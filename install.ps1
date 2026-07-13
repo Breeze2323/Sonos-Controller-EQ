@@ -93,7 +93,7 @@ if (-not $CtrlPort) { $CtrlPort = "3000" }
 
 $configJson = @{
     "sonos-config" = @{
-        host = "localhost"
+        host = "127.0.0.1"
         port = $ApiPort
         room = $RoomName
     }

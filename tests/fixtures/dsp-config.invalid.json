@@ -1,0 +1,7 @@
+{
+  "schemaVersion": 2,
+  "enabled": "yes",
+  "preampDb": 8,
+  "graphicEq": { "bands": [{ "frequencyHz": 5, "gainDb": 40, "enabled": true }] },
+  "parametricEq": { "filters": [{ "type": "unknown", "frequencyHz": 99999, "gainDb": 99, "q": 0, "enabled": false }] }
+}

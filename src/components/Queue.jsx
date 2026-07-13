@@ -24,7 +24,7 @@ function QueueTrack({ track, index, isCurrent, deviceBase }) {
   )
 }
 
-export default function Queue({ config, deviceBase, currentTrackNo, playbackState }) {
+export default function Queue({ config, deviceBase, currentTrackNo, playbackState: _playbackState }) {
   const [tracks, setTracks]   = useState([])
   const [loading, setLoading] = useState(true)
   const abortRef = useRef(null)

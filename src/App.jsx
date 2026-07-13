@@ -142,7 +142,7 @@ export default function App() {
     setConfig,
   } = useProfiles()
 
-  const { applying, testing, fetchingSettings, testConnection, applyProfile, fetchCurrentSettings } = useSonosApi()
+  const { testing, fetchingSettings, testConnection, applyProfile, fetchCurrentSettings } = useSonosApi()
 
   // Per-profile debounce timers for the card sub slider
   const subTimers = useRef({})

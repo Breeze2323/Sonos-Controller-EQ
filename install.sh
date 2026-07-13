@@ -86,7 +86,7 @@ CTRL_PORT="${CTRL_PORT:-3000}"
 cat > "$INSTALL_DIR/sonos-data.json" <<JSON
 {
   "sonos-config": {
-    "host": "localhost",
+    "host": "127.0.0.1",
     "port": "$API_PORT",
     "room": "$ROOM_NAME"
   }

@@ -1,11 +1,8 @@
 import { useState, useCallback, useEffect } from 'react'
 import { loadStore, saveKey, lsGet, lsSet } from '../lib/fileStore'
+import { DEFAULT_SONOS_CONFIG } from '../lib/defaultConfig'
 
-const DEFAULT_CONFIG = {
-  host: 'localhost',
-  port: '5005',
-  room: 'Living Room',
-}
+const DEFAULT_CONFIG = DEFAULT_SONOS_CONFIG
 
 const DEFAULT_PROFILES = [
   {
