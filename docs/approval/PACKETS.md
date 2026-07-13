@@ -58,3 +58,49 @@ evidence-ready templates with required guardrails and explicit stop conditions.
   - release manifest + checksums
   - smoke/rollback evidence
   - post-deploy health probe
+
+## F — Production rollback/disaster recovery
+
+- Gate: `PRODUCTION_CONTROLLER_DEPLOYMENT_APPROVAL_REQUIRED`
+- Scope: production rollback only after a failed or uncertain live canary/dry-run or post-merge fallback.
+- Required evidence before execution:
+  - package and deployment manifest recorded in issue notes
+  - pre-change snapshots (live `sonos-data.json`, controller configuration, service state hashes, endpoint plan)
+  - service/process control plan for stopping and restoring known-good build
+  - rollback trigger conditions and timeout
+- Required evidence after execution:
+  - service and process back to prior known-good PID/state
+  - `sonos-data.json` and any produced logs restored
+  - release health checks back to green or safe mode
+  - explicit user confirmation that listener and routes resumed correctly
+- Current status: not executed; evidence-only now.
+- Fail conditions: do not proceed on uncertain health/readback; preserve latest-good backup.
+
+## G — PR review and merge
+
+- Gate: `PR_REVIEW_AND_MERGE_APPROVAL_REQUIRED`
+- Scope: production branch merge of `agent/prelive-audio-control-stack` into `main`.
+- Current status: PR #6 remains draft and open; merge blocked until:
+  - exact-head CI remains green
+  - hostile review has no unresolved blocker
+  - approval packets above are all reviewed
+  - local/remote/PR parity and evidence index are current
+- Required evidence before merge:
+  - branch comparison and diff summary
+  - complete test evidence and release artifact checksum evidence
+  - confirmed no prohibited destructive actions executed in this milestone
+  - operator signoff for any remaining approval gates
+
+## H — Disaster/recovery proof bundle
+
+- Scope: prove evidence-backed recovery paths before live action.
+- Required artifacts:
+  - local/remote/PR parity proof
+  - readiness and Sonos discovery snapshots
+  - disposable harness results (including fail-safe cleanup and recovery assertions)
+  - release validation manifest and checksums
+- Required execution evidence:
+  - corrupt controller state + repair steps
+  - failed synthetic schedule state + idempotent resume behavior
+  - production-like port collision and fallback behavior
+- Current status: partially covered in `docs/handoffs/CURRENT_HANDOFF.md` and `docs/DISPOSABLE_INTEGRATION.md`; no production execution performed in this milestone.

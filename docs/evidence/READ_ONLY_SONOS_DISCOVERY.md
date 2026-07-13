@@ -1,7 +1,7 @@
 # Read-only Sonos discovery evidence
 
 **Executed against:** `http://127.0.0.1:5005`
-**Date:** `2026-07-13T06:43:07-06:00`
+**Date:** `2026-07-13T07:04:53-06:00`
 **Mode:** read-only HTTP GET checks only
 
 ## Fact classes
@@ -17,12 +17,14 @@
 - `/zones` is reachable and returned a single-zone state payload for `Living Room`.
 - `/<room>/state` is reachable for the discovered room name (`Living Room`) and returned read-only state data.
 - Example values observed:
-  - `playbackState`: `STOPPED`
-  - `volume`: `64`
-  - `mute`: `False`
-  - `equalizer.loudness`: `True`
-  - `equalizer.nightMode`: `False`
-  - `equalizer.speechEnhancement`: `False`
+- `playbackState`: `PLAYING`
+- `volume`: `64`
+- `mute`: `false`
+- `equalizer.bass`: `10`
+- `equalizer.treble`: `10`
+- `equalizer.loudness`: `true`
+- `equalizer.nightMode`: `false`
+- `equalizer.speechEnhancement`: `false`
   - `sub.enabled`: `True`
   - `sub.gain`: `5`
 - State shape includes `groupState` and `currentTrack`/`nextTrack` objects.

@@ -15,7 +15,7 @@ This audit distinguishes implemented software evidence from approval-gated live 
 | REW | bounded parser, preview route, UI preview/import, bounded deduplicated local audit | Implemented pre-live |
 | Regression/security validation | `npm run check`: 36 Node tests, 2 jsdom UI tests, lint, build, secret scan; source scan found no targeted direct write proxy invocation | Local evidence |
 | Read-only readiness evidence | Beast2 readiness script + Sonos/API discovery + APO explicit-path probe evidence generated in this checkpoint | Repository-proven evidence |
-| CI and PR | Draft PR #6; branch head `7c2d892a034ea59aac848c4e90c950165d0b56e4`; latest exact-head CI success at `29251952804` (push CI run `29251949817`) | Local checkpoint evidence |
+| CI and PR | Draft PR #6; branch head `b4b639c1b471729f4e1160c9c7a95ded5ce66094`; latest exact-head CI success at `29252053790` (push CI run `29252058694`) | Local checkpoint evidence |
 
 ## Remaining approval-gated work
 
