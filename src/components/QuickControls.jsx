@@ -9,15 +9,10 @@ function useDebouncedApply(config, command, delay = 350) {
   const [lastSent, setLastSent] = useState(null)
 
   const send = useCallback(async (value) => {
-    const url = `/sonos-proxy?url=${encodeURIComponent(
-      `http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/${command}/${value}`
-    )}`
-    try {
-      await fetch(url)
-    } catch {}
+    // Pre-live policy: retain UI preview state but never proxy a Sonos write.
     setLastSent(value)
     setPending(false)
-  }, [config, command])
+  }, [])
 
   const trigger = useCallback((value) => {
     setPending(true)
@@ -176,14 +171,7 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
   const handleGroupToggle = async () => {
     if (groupPending || !otherRoom) return
     setGroupPending(true)
-    try {
-      if (isGrouped) {
-        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(otherRoom)}/leave`)}`)
-      } else {
-        await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/add/${encodeURIComponent(otherRoom)}`)}`)
-      }
-      setTimeout(pollZones, 1000)
-    } catch {}
+    // Group changes are live topology writes and are intentionally preview-only.
     setGroupPending(false)
   }
 
@@ -210,10 +198,8 @@ export default function QuickControls({ config, appliedProfile, collapsed, onTog
   }
 
   const sendToggle = (command, enabled) => {
-    const url = `/sonos-proxy?url=${encodeURIComponent(
-      `http://${config.host}:${config.port}/${encodeURIComponent(config.room)}/${command}/${enabled ? 'on' : 'off'}`
-    )}`
-    fetch(url).catch(() => {})
+    // Retained for UI state compatibility; no Sonos mutation before approval.
+    void command; void enabled
   }
 
   const handleSubToggle = (enabled) => {

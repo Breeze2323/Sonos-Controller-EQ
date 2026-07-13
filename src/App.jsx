@@ -153,10 +153,7 @@ export default function App() {
     // Live send only — does NOT persist to the stored profile
     clearTimeout(subTimers.current[profile.id])
     subTimers.current[profile.id] = setTimeout(() => {
-      const base = `http://${config.host}:${config.port}`
-      const room = encodeURIComponent(config.room)
-      fetch(`/sonos-proxy?url=${encodeURIComponent(`${base}/${room}/subwoofer/${value}`)}`)
-        .catch(() => {})
+    void value
     }, 350)
   }, [config])
 
@@ -166,10 +163,7 @@ export default function App() {
     // Live send only — does NOT persist to the stored profile
     clearTimeout(volTimers.current[profile.id])
     volTimers.current[profile.id] = setTimeout(() => {
-      const base = `http://${config.host}:${config.port}`
-      const room = encodeURIComponent(config.room)
-      fetch(`/sonos-proxy?url=${encodeURIComponent(`${base}/${room}/volume/${value}`)}`)
-        .catch(() => {})
+    void value
     }, 350)
   }, [updateProfile, config])
 
@@ -213,10 +207,7 @@ export default function App() {
   }, [addEntry, addToast])
 
   const handleSessionStart = useCallback((volume) => {
-    const base = `http://${config.host}:${config.port}`
-    const room = encodeURIComponent(config.room)
-    fetch(`/sonos-proxy?url=${encodeURIComponent(`${base}/${room}/volume/${volume}`)}`).catch(() => {})
-    addToast(`Session started — volume set to ${volume}`, 'info')
+    addToast(`Session start volume ${volume} previewed; live writes are disabled.`, 'info')
   }, [config, addToast])
 
   const { enabled: sessionEnabled, setEnabled: setSessionEnabled, startVolume, setStartVolume } =
