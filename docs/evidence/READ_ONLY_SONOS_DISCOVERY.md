@@ -1,7 +1,8 @@
 # Read-only Sonos discovery evidence
 
 **Executed against:** `http://127.0.0.1:5005`
-**Date:** `2026-07-13T07:04:53-06:00`
+**Date:** `2026-07-13T07:37:44-06:00`
+**Raw report path (not committed):** `reports/sonos-discovery-20260713-073744.json`
 **Mode:** read-only HTTP GET checks only
 
 ## Fact classes
@@ -14,8 +15,8 @@
 
 ## Endpoint findings
 
-- `/zones` is reachable and returned a single-zone state payload for `Living Room`.
-- `/<room>/state` is reachable for the discovered room name (`Living Room`) and returned read-only state data.
+- `/zones` is reachable and returned a single-zone payload including `roomName: "Living Room"`.
+- `Living%20Room/state` is reachable for the discovered room name and returned read-only state data.
 - Example values observed:
 - `playbackState`: `PLAYING`
 - `volume`: `64`
@@ -27,13 +28,13 @@
 - `equalizer.speechEnhancement`: `false`
   - `sub.enabled`: `True`
   - `sub.gain`: `5`
+- `room hash (redacted)`: `TGl2aW5nIFJv`
 - State shape includes `groupState` and `currentTrack`/`nextTrack` objects.
 
 ## Topology snapshot
 
 - Zone count: `1`
 - Grouped topology: single-member zone (`False`)
-- Room hash (redacted): `TGl2aW5nIFJv`
 - Coordinator/zone UUID read for consistency was redacted from this report and preserved only in local evidence tooling.
 
 ## Capability verification

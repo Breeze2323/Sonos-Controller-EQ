@@ -58,5 +58,5 @@ The following scenarios are covered in this checkpoint:
 
 Script writes a JSON file named `artifacts/disposable-prelive-<timestamp>.json` under the launch directory with per-scenario pass/fail/skip status and counts.
 
-Latest run: `artifacts/disposable-prelive-20260713-0704/artifacts/disposable-prelive-1783947792189.json`
+Latest run: `artifacts/disposable-prelive-20260713-073747/artifacts/disposable-prelive-1783949872228.json`
 Result: `pass=23`, `fail=0`, `skip=2` (`schedule preview`, `duplicate schedule suppression`).

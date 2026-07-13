@@ -1,6 +1,6 @@
 # Current Handoff: Pre-live operator-readiness checkpoint
 
-Updated: 2026-07-13T07:24:45-06:00
+Updated: 2026-07-13T07:42:30-06:00
 
 ## Live-verified state
 
@@ -9,21 +9,21 @@ Updated: 2026-07-13T07:24:45-06:00
 - Base/main SHA: `213e04612fc24a869988f9de1a5ec6707406dde8` (`main`)
 - Starting checkpoint SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
 - Draft PR: [#6](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/6), state `OPEN`, title `Complete pre-live Sonos and DSP control stack`
-- Current local branch SHA: `5068977bb200b97f2fad43a94701708afc213d77`
+- Current local branch SHA: `086b22e04e2e47338decf665367c267c08b85ca1`
 
 ## Completed bounded checkpoints (since earlier handoff)
 
 - Read-only Beast2 readiness report executed (`Test-DspReadiness.ps1`) and summarized in
   `docs/evidence/READ_ONLY_BEAST2_READINESS.md`:
-  `reports/local-dsp-readiness-20260713-070451.json`.
+  `reports/local-dsp-readiness-20260713-073730.json`.
 - Explicit Equalizer APO candidate-path probe results captured in
   `docs/evidence/APO_READINESS_EXPLICIT_PATH_PROBE.md`.
 - Live loopback Sonos discovery executed against `127.0.0.1:5005` and summarized in
   `docs/evidence/READ_ONLY_SONOS_DISCOVERY.md` (`GET /zones` + `GET /<room>/state`).
 - Scoped disposable pre-live harness executed; latest evidence:
-  `artifacts/disposable-prelive-20260713-0704/artifacts/disposable-prelive-1783947792189.json`
+  `artifacts/disposable-prelive-20260713-073747/artifacts/disposable-prelive-1783949872228.json`
   (`pass=23`, `fail=0`, `skip=2`).
-- Release packaging verified via deterministic scratch (`artifacts/releases/0.1.0-final-sanity/0.1.0/20260713-070320`) through
+- Release packaging verified via deterministic scratch (`artifacts/releases/0.1.0/20260713-073807`) through
   `New-ReleasePackage.ps1` + `Test-ReleasePackage.ps1`.
 - Approval packet documentation updated under `docs/approval/PACKETS.md`.
 - `scripts/windows/Invoke-PrelivePlan.ps1` fail-closed validation scenarios re-run and reported expected plan/deny outputs.
@@ -48,7 +48,7 @@ Updated: 2026-07-13T07:24:45-06:00
 - `npm run check` (passes: lint + 36 node tests + 2 UI tests + build + secret-scan)
 - PowerShell parser validation for `*.ps1` scripts passed.
 - Readiness/discovery/disposable/runbook commands run in this checkpoint:
-- `.\scripts\windows\Test-DspReadiness.ps1 -CheckLoopbackServices -OutputPath reports\\local-dsp-readiness-20260713-070451.json`
+- `.\scripts\windows\Test-DspReadiness.ps1 -CheckLoopbackServices -OutputPath reports\\local-dsp-readiness-20260713-073730.json`
   - loopback `GET /zones` and `/<room>/state` on `127.0.0.1:5005`
   - explicit APO probe with absolute paths + rejected relative path
   - `.\scripts\Test-DisposablePrelive.ps1` (non-production synthetic stack)
