@@ -1,66 +1,65 @@
-# Current Handoff: Pre-live audio control stack
+# Current Handoff: Pre-live operator-readiness checkpoint
 
-Updated: 2026-07-13T04:10:00-06:00
+Updated: 2026-07-13T06:44:10-06:00
 
 ## Live-verified state
 
 - Repository/worktree: `E:\Git\Sonos-Controller-EQ`
 - Branch: `agent/prelive-audio-control-stack`
-- Base: `1ee1eb396c97ae2d26a17bcba199b4ca295db918` (`main`)
-- Last pushed handoff checkpoint: `ea18ca9`
-- Latest implementation checkpoint: `4aa50809325c01044600ec188182f69e937388f9`
-- Subsequent pushed checkpoints: `cebd218` (separate staging), `623c87a` (DSP panel), `2029318` (REW preview API), `f5714f3` (REW UI preview), and `feb11f7` (validated Sonos controls).
-- Latest implementation checkpoints: `ccfd7cf` (parametric/presets/A-B/source UI), `fb3afae` (read-only capability view), `02edad0` (preview-only scheduler), `8681cdf` (REW audit persistence), and `f61a78b` (save DSP draft to unified profile).
-- Latest safety checkpoints: `74b6d22` makes inherited quick-control, transport, grouping, session, and slider actions preview-only; `12af627` makes the legacy bulk profile-apply hook return a structured preview-only block with no network requests.
-- Latest validation checkpoints: `372c591` adds Vitest/jsdom UI coverage and includes it in `npm run check`; `b470050` adds an explicit-path, read-only Equalizer APO readiness probe.
-- Draft PR: [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5), targeting `main`
-- Exact-head CI: `fb3afae` is green on Ubuntu/Windows and Node 20/22. CI for `8681cdf` and `f61a78b` is pending GitHub completion.
-- Worktree was clean before the profile-migration checkpoint.
+- Base/main SHA: `213e04612fc24a869988f9de1a5ec6707406dde8` (`main`)
+- Starting checkpoint SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
+- Draft PR: [#6](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/6), state `OPEN`, title `Continue pre-live Sonos native and DSP control stack`
+- Current local branch SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
 
-## Completed bounded checkpoints
+## Completed bounded checkpoints (since earlier handoff)
 
-- `3b21de3`: Sonos HTTP adapter contracts, source-coverage domain states, and basic REW filter parsing.
-- `e87ddd9`: sandbox-only Equalizer APO adapter with recoverable configuration writes.
-- `7705b9c`: scoped Sonos and DSP controller routes.
-- `7861031`: client-side filter-response and clipping-risk calculation primitives.
-- `8fccede`, corrected by `31124f0`: initial unified profile-schema migration and tests.
-- `4aa5080`: persisted-collection migration, shared source-coverage contract, malformed-record recovery retention, and compatibility projection for the current profile UI.
+- Read-only Beast2 readiness report executed (`Test-DspReadiness.ps1`) and summarized in
+  `docs/evidence/READ_ONLY_BEAST2_READINESS.md`.
+- Explicit Equalizer APO candidate-path probe results captured in
+  `docs/evidence/APO_READINESS_EXPLICIT_PATH_PROBE.md`.
+- Live loopback Sonos discovery executed against `127.0.0.1:5005` and summarized in
+  `docs/evidence/READ_ONLY_SONOS_DISCOVERY.md`.
+- Scoped disposable pre-live harness executed; latest evidence:
+  `artifacts/disposable-prelive-20260713-064246/artifacts/disposable-prelive-1783946571509.json`
+  (`pass=23`, `fail=0`, `skip=2`).
+- Release packaging verified both in-repo artifact (`artifacts/releases/0.1.0/20260713-064301`)
+  and external temp scratch (`%TEMP%\\prelive-release-ext-*`) through `New-ReleasePackage.ps1` + `Test-ReleasePackage.ps1`.
+- Approval packet documentation updated under `docs/approval/PACKETS.md`.
+- `scripts/windows/Invoke-PrelivePlan.ps1` fail-closed validation scenarios re-run and reported expected plan/deny outputs.
 
 ## Current implementation state
 
-- Sonos adapter defaults to read-only behavior; settings application returns a structured block unless writes are explicitly enabled. No live request has been made.
-- Equalizer APO support is restricted to an injected sandbox root. It has not detected, installed, configured, or written to a live APO installation.
-- DSP routes use the mock adapter by default; stage and apply have separated semantics and staging does not apply configuration.
-- Unified profile migration is applied at the `useProfiles` persistence boundary. Valid v1 entries are upgraded, invalid entries remain persisted and are exposed through `profileMigrationRejections`, and an early nested-only v2 shape is repaired with a temporary flat UI projection.
-- Source-coverage defaults now live in `shared/domain/sourceCoverage.js`; server consumers retain their existing import path through a re-export.
-- The DSP tab supplies 15/31-band graphic controls, response/headroom estimates, and sandbox/mock-only stage, apply, and bypass actions. It also previews REW text and imports filters only into the in-memory draft.
-- The REW API route is preview-only and returns explicit `applied: false` and `liveAudioProcessed: false` evidence.
-- Sonos native control validation covers loudness, Sub, surround, night/speech, and dialog sync inputs, but writes remain blocked by default and were not invoked.
-- A source scan found no remaining targeted direct mutation proxy calls in `src`; read-only metadata, queue, artwork, and capability requests remain separately scoped.
-- Scheduled profile matches now emit preview/audit results instead of invoking the legacy live profile-apply path.
-- REW imports retain bounded deduplicated local audit entries with hashes and normalized filters; an explicit action can save the DSP draft, coverage state, and import hash into the active profile without applying it.
+- Sonos adapter defaults to read-only writes and returns structured preview blocks.
+- DSP adapter semantics remain stage/apply distinct and sandbox scoped.
+- Equalizer APO is still explicit-path only for readiness checks; no live install/configuration attempted.
+- REW parse remains preview-only and writes are not claimed as live.
 
 ## Local validation evidence
 
-Using the bundled Node 24 runtime, focused REW-audit tests passed; the most recent full `npm run check` passed: lint, 27 tests, production build, and secret scan. Earlier in the milestone, `npm ci --ignore-scripts` and PowerShell parser validation also passed. `npm audit` reported 12 inherited vulnerabilities in the pinned legacy `node-sonos-http-api` dependency; no upgrade was made.
+- Node/tooling used:
+  - `node v24.14.0` / `npm 10.8.2` when using the configured runtime path.
+  - Default shell node command reports `v18.20.8 / 10.8.2`.
+- Verification commands run in this checkpoint:
+  - `npm run lint`
+  - `npm test`
+  - `npm run build`
+  - `npm run secret-scan`
+  - `npm run check` (passes: lint + 30 node tests + 2 UI tests + build + secret-scan)
+  - PowerShell parser validation for `*.ps1` scripts passed.
+- Readiness/discovery/disposable/runbook commands run in this checkpoint:
+  - `.\scripts\windows\Test-DspReadiness.ps1 -CheckLoopbackServices -OutputPath reports\\local-dsp-readiness-20260713-064234.json`
+  - loopback `GET /zones` and `/<room>/state` on `127.0.0.1:5005`
+  - explicit APO probe with absolute paths + rejected relative path
+  - `.\scripts\Test-DisposablePrelive.ps1` (non-production synthetic stack)
+  - `.\scripts\windows\Invoke-PrelivePlan.ps1` mismatched and matching plan-token scenarios
 
-The default shell Node is older and emits engine warnings. Use the bundled runtime path before npm commands:
+## Incomplete/non-final work
 
-```powershell
-$nodeBin='C:\Users\Ty\.cache\codex-runtimes\codex-primary-runtime\dependencies\node\bin'
-$fallback='C:\Users\Ty\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\fallback'
-$override='C:\Users\Ty\.cache\codex-runtimes\codex-primary-runtime\dependencies\bin\override'
-$env:PATH="$nodeBin;$override;$fallback;$env:PATH"
-```
-
-## Incomplete work and next atomic unit
-
-1. Commit and push this handoff update, then verify exact-head CI for the resulting branch head.
-2. Add component-level or browser-level coverage for the DSP/REW/native capability surfaces, and extend negative/security coverage.
-3. Review the remaining inherited direct Sonos-write UI paths and make their pre-live policy explicit without breaking future approval-gated architecture.
-4. Perform a requirement-by-requirement hostile completion audit and update documentation with verified limitations and named gates.
-5. Do not claim completion: a real live endpoint canary, live Sonos-write validation, and production deployment remain named approval gates.
+1. Hostile-review expansion for route/behavior gaps not yet exhaustive.
+2. Broader disposable scenario matrix (scheduler persistence, duplicate suppression, crash-recovery) is partially documented but not yet all automated.
+3. Fail-closed planner and approval artifacts are documented but not yet covered by unit tests.
 
 ## Safety and approval gates
 
-No Sonos writes, production-controller requests, port-3000 startup, Windows audio endpoint/DSP changes, Equalizer APO installation, or live playback changes were performed. The next non-code gate remains `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED`; live DSP and Sonos writes remain separately gated.
+- No live production controller requests, Sonos writes, Windows endpoint mutation, APO installation, or production deployment were performed.
+- Next non-code gate remains `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED`; live DSP and Sonos-write gates remain active.

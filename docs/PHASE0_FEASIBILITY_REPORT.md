@@ -8,27 +8,25 @@
 - Read-only Windows readiness inventory exists.
 - Unit tests and cross-platform CI scaffolding exist.
 - Verified upstream seed: `main`, `origin/main`, and `upstream/main` are `fb3f7cca1bc920dace501cd7ff564e526aa8eec5`.
-- The imported React/Vite controller builds with the pinned `node-sonos-http-api` source archive.
 - The bounded controller proxy reaches a configured `127.0.0.1` mock API and rejects a different target.
 - Store POST rejects malformed JSON and preserves existing keys through an atomic sibling-file write and backup.
 - Deterministic lint, unit/integration tests, build, and secret scan exist; mocks are not live audio or Sonos validation.
+- Read-only readiness and discovery evidence were produced in this checkpoint without mutation.
 
 ## Live-verified GitHub state
 
 - Canonical repository: `Breeze2323/Sonos-Controller-EQ`.
-- Foundation commit on `main`: `968593b2ed604fbc727f6e353bb530f52e166828`.
-- Initial Codex branch: `agent/project-foundation-audio-path-feasibility`.
+- Active branch: `agent/prelive-audio-control-stack`.
+- Foundation commit on `main`: `213e04612fc24a869988f9de1a5ec6707406dde8`.
 - Project charter: issue #1.
-- Initial import/build milestone: issue #2.
+- Active milestone issue: `#4`.
 
 ## Operator-reported production facts
 
-- Beast2 runs the working controller at `127.0.0.1:3000`.
-- The local Sonos HTTP API runs at `127.0.0.1:5005`.
-- Target group: Arc Ultra + Sub + 2 × Era 300.
-- Audio path: Beast2 HDMI → LG C2 → eARC → Arc Ultra.
+- Beast2 runs the working controller at `127.0.0.1:3000` when running.
+- The local Sonos HTTP API runs at `127.0.0.1:5005` when running.
 
-These remain operator-reported until reverified by the active Codex worktree.
+These remain operator-reported unless reverified by direct local evidence.
 
 ## Deferred repository work
 
@@ -47,6 +45,12 @@ These remain operator-reported until reverified by the active Codex worktree.
 - Live Arc Ultra capability ranges beyond current readback.
 - Production deployment and reboot validation.
 
+## Additional read-only evidence added in this checkpoint
+
+- `docs/evidence/READ_ONLY_BEAST2_READINESS.md`
+- `docs/evidence/READ_ONLY_SONOS_DISCOVERY.md`
+- `docs/evidence/APO_READINESS_EXPLICIT_PATH_PROBE.md`
+
 ## First live canary packet (do not execute)
 
 Required approval token: `LIVE_DSP_CANARY_APPROVAL_REQUIRED`.
@@ -60,4 +64,4 @@ Required approval token: `LIVE_DSP_CANARY_APPROVAL_REQUIRED`.
 
 ## Next gate
 
-Codex must import and validate the upstream application, run the read-only readiness script, and produce a deterministic canary packet. Live installation or audio mutation stops at `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED` or `LIVE_DSP_CANARY_APPROVAL_REQUIRED`.
+Codex must import and validate the upstream application, run disposable integration evidence, and produce a deterministic canary packet. Live installation or audio mutation stops at `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED` or `LIVE_DSP_CANARY_APPROVAL_REQUIRED`.
