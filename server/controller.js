@@ -2,6 +2,8 @@ import http from 'node:http'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { HttpSonosAdapter } from './services/sonos/HttpSonosAdapter.js'
+import { MockDspAdapter } from './services/dsp/MockDspAdapter.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const MAX_BODY = 256 * 1024
@@ -59,9 +61,31 @@ async function readBody(req) {
   for await (const chunk of req) { size += chunk.length; if (size > MAX_BODY) { const err = new Error('too large'); err.code = 'TOO_LARGE'; throw err } chunks.push(chunk) }
   return JSON.parse(Buffer.concat(chunks).toString('utf8'))
 }
-export function createControllerHandler({ dataFile = path.join(__dirname, '..', 'sonos-data.json'), distDir = path.join(__dirname, '..', 'dist') } = {}) {
+export function createControllerHandler({ dataFile = path.join(__dirname, '..', 'sonos-data.json'), distDir = path.join(__dirname, '..', 'dist'), sonosAdapter = new HttpSonosAdapter(), dspAdapter = new MockDspAdapter() } = {}) {
   return async (req, res, next) => {
     const url = new URL(req.url, 'http://localhost')
+    if (url.pathname.startsWith('/api/sonos/')) {
+      if (req.method === 'GET') {
+        try {
+          if (url.pathname === '/api/sonos/health') return json(res, 200, await sonosAdapter.probe())
+          if (url.pathname === '/api/sonos/zones') return json(res, 200, await sonosAdapter.getZones())
+          if (url.pathname === '/api/sonos/state') return json(res, 200, await sonosAdapter.getState(url.searchParams.get('room')))
+          if (url.pathname === '/api/sonos/capabilities') return json(res, 200, await sonosAdapter.getCapabilities(url.searchParams.get('room')))
+        } catch (cause) { return error(res, 503, 'SONOS_UNAVAILABLE', cause.message) }
+      }
+      if (req.method === 'POST' && url.pathname === '/api/sonos/settings/apply') { try { const body = await readBody(req); return json(res, 200, await sonosAdapter.applySettings(body.roomId, body.settings)) } catch (cause) { return error(res, 400, 'INVALID_SONOS_REQUEST', cause.message) } }
+      return error(res, 404, 'SONOS_ROUTE_NOT_FOUND', 'Unknown Sonos API route')
+    }
+    if (url.pathname.startsWith('/api/dsp/')) {
+      if (req.method === 'GET') {
+        if (url.pathname === '/api/dsp/capabilities') return json(res, 200, await dspAdapter.probe())
+        if (url.pathname === '/api/dsp/status') return json(res, 200, await dspAdapter.getStatus())
+        if (url.pathname === '/api/dsp/config') return json(res, 200, await dspAdapter.getConfiguration())
+        if (url.pathname === '/api/dsp/history') return json(res, 200, { history: dspAdapter.history ?? [] })
+      }
+      if (req.method === 'POST') { try { const body = await readBody(req); if (url.pathname === '/api/dsp/validate') return json(res, 200, dspAdapter.validateConfiguration(body)); if (url.pathname === '/api/dsp/stage' || url.pathname === '/api/dsp/apply') return json(res, 200, await dspAdapter.applyConfiguration(body)); if (url.pathname === '/api/dsp/bypass') return json(res, 200, await dspAdapter.bypass(body.enabled)); if (url.pathname === '/api/dsp/rollback') return json(res, 200, await dspAdapter.rollback(body.versionId)) } catch (cause) { return error(res, 400, 'INVALID_DSP_REQUEST', cause.message) } }
+      return error(res, 404, 'DSP_ROUTE_NOT_FOUND', 'Unknown DSP API route')
+    }
     if (url.pathname === '/sonos-store') {
       if (req.method === 'GET') { try { return json(res, 200, await readStore(dataFile)) } catch { return error(res, 500, 'STORE_MALFORMED', 'Stored controller data is malformed') } }
       if (req.method !== 'POST') return error(res, 405, 'METHOD_NOT_ALLOWED', 'Only GET and POST are supported')

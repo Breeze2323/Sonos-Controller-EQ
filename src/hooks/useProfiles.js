@@ -1,6 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { loadStore, saveKey, lsGet, lsSet } from '../lib/fileStore'
 import { DEFAULT_SONOS_CONFIG } from '../lib/defaultConfig'
+import {
+  applyProfileUpdates,
+  migrateProfile,
+  resolvePersistedProfiles,
+} from '../lib/profileSchema'
 
 const DEFAULT_CONFIG = DEFAULT_SONOS_CONFIG
 
@@ -40,6 +45,10 @@ const DEFAULT_PROFILES = [
   },
 ]
 
+function loadProfiles(value) {
+  return resolvePersistedProfiles(value, DEFAULT_PROFILES)
+}
+
 function genId() {
   return 'profile-' + Math.random().toString(36).slice(2, 10)
 }
@@ -47,7 +56,10 @@ function genId() {
 export function useProfiles() {
   // Initialise from localStorage for instant load (no async flash)
   const [profiles, setProfilesState] = useState(() =>
-    lsGet('sonos-profiles', DEFAULT_PROFILES)
+    loadProfiles(lsGet('sonos-profiles', DEFAULT_PROFILES)).profiles
+  )
+  const [profileMigrationRejections, setProfileMigrationRejections] = useState(() =>
+    loadProfiles(lsGet('sonos-profiles', DEFAULT_PROFILES)).rejected
   )
   const [activeProfileId, setActiveProfileIdState] = useState(() =>
     lsGet('sonos-active-profile', null)
@@ -61,21 +73,25 @@ export function useProfiles() {
   // so existing data is migrated immediately.
   useEffect(() => {
     loadStore().then((store) => {
-      const resolvedProfiles = store['sonos-profiles'] ?? lsGet('sonos-profiles', DEFAULT_PROFILES)
+      const storedProfiles = store['sonos-profiles'] ?? lsGet('sonos-profiles', DEFAULT_PROFILES)
+      const resolvedProfiles = loadProfiles(storedProfiles)
       const resolvedActiveId = store['sonos-active-profile'] !== undefined
         ? store['sonos-active-profile']
         : lsGet('sonos-active-profile', null)
       const resolvedConfig = store['sonos-config'] ?? lsGet('sonos-config', DEFAULT_CONFIG)
 
-      lsSet('sonos-profiles', resolvedProfiles)
+      // Invalid entries remain at their original array positions for recovery;
+      // valid legacy entries are upgraded in place.
+      lsSet('sonos-profiles', resolvedProfiles.persistedProfiles)
       lsSet('sonos-active-profile', resolvedActiveId)
       lsSet('sonos-config', resolvedConfig)
 
-      saveKey('sonos-profiles', resolvedProfiles)
+      saveKey('sonos-profiles', resolvedProfiles.persistedProfiles)
       saveKey('sonos-active-profile', resolvedActiveId)
       saveKey('sonos-config', resolvedConfig)
 
-      setProfilesState(resolvedProfiles)
+      setProfilesState(resolvedProfiles.profiles)
+      setProfileMigrationRejections(resolvedProfiles.rejected)
       setActiveProfileIdState(resolvedActiveId)
       setConfigState(resolvedConfig)
     })
@@ -106,14 +122,16 @@ export function useProfiles() {
   }, [])
 
   const addProfile = useCallback((profileData) => {
-    const newProfile = { ...profileData, id: genId() }
+    const migrated = migrateProfile({ ...profileData, id: genId() })
+    if (!migrated.ok) throw new Error('PROFILE_INVALID')
+    const newProfile = migrated.profile
     setProfiles((prev) => [...prev, newProfile])
     return newProfile
   }, [setProfiles])
 
   const updateProfile = useCallback((id, updates) => {
     setProfiles((prev) =>
-      prev.map((p) => (p.id === id ? { ...p, ...updates } : p))
+      prev.map((p) => (p.id === id ? applyProfileUpdates(p, updates) : p))
     )
   }, [setProfiles])
 
@@ -133,6 +151,7 @@ export function useProfiles() {
 
   return {
     profiles,
+    profileMigrationRejections,
     activeProfileId,
     activeProfile,
     config,
