@@ -15,6 +15,10 @@ export class DspAdapter {
     throw new Error('validateConfiguration() not implemented')
   }
 
+  async stageConfiguration(_configuration) {
+    throw new Error('stageConfiguration() not implemented')
+  }
+
   async applyConfiguration(_configuration) {
     throw new Error('applyConfiguration() not implemented')
   }

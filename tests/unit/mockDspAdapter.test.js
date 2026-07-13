@@ -27,3 +27,12 @@ test('mock adapter rejects invalid configuration', async () => {
   assert.equal(result.ok, false)
   assert.equal(result.applied, false)
 })
+
+test('mock adapter stages without changing the active configuration', async () => {
+  const adapter = new MockDspAdapter()
+  const staged = await adapter.stageConfiguration(config)
+  assert.equal(staged.staged, true)
+  assert.equal(staged.applied, false)
+  assert.equal(await adapter.getConfiguration(), null)
+  assert.equal((await adapter.getStatus()).hasStagedConfiguration, true)
+})

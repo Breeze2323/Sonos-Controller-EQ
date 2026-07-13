@@ -1,5 +1,5 @@
 import { createHash } from 'node:crypto'
-import { mkdir, readFile, rename, writeFile, copyFile } from 'node:fs/promises'
+import { lstat, mkdir, readFile, rename, writeFile, copyFile } from 'node:fs/promises'
 import path from 'node:path'
 import { DspAdapter } from './DspAdapter.js'
 import { validateDspConfiguration } from '../../validation/dspConfig.js'
@@ -13,12 +13,15 @@ export function serializeEqualizerApo(configuration) {
   return `${lines.join('\n')}\n`
 }
 export class EqualizerApoAdapter extends DspAdapter {
-  constructor({ sandboxRoot, liveEnabled = false } = {}) { super(); if (!sandboxRoot) throw new TypeError('sandboxRoot is required'); this.root = path.resolve(sandboxRoot); this.liveEnabled = liveEnabled; this.history = []; this.bypassed = false }
+  constructor({ sandboxRoot, liveEnabled = false } = {}) { super(); if (!sandboxRoot) throw new TypeError('sandboxRoot is required'); if (liveEnabled) throw new TypeError('live Equalizer APO mode is not supported'); this.root = path.resolve(sandboxRoot); this.history = []; this.bypassed = false; this.stagedConfiguration = null }
   async probe() { return { engine: 'equalizer-apo', mode: 'sandbox_only', available: true, liveAudioProcessed: false, root: this.root } }
   validateConfiguration(config) { return validateDspConfiguration(config) }
-  async getStatus() { return { engine: 'equalizer-apo', mode: 'sandbox_only', bypassed: this.bypassed, activeVersionId: this.history.at(-1)?.versionId ?? null, liveAudioProcessed: false } }
-  async getConfiguration() { try { return { text: await readFile(path.join(this.root, 'active.txt'), 'utf8') } } catch { return null } }
-  async applyConfiguration(config) { const text = serializeEqualizerApo(config); await mkdir(this.root, { recursive: true }); const active = path.join(this.root, 'active.txt'); const staged = path.join(this.root, `staged-${Date.now()}.txt`); const backup = path.join(this.root, 'active.previous.txt'); try { await readFile(active); await copyFile(active, backup) } catch (cause) { if (cause.code !== 'ENOENT') throw cause }; await writeFile(staged, text, { flag: 'wx' }); await rename(staged, active); const versionId = hash(text); this.history.push({ versionId, backup }); return { ok: true, status: 'sandbox_applied', versionId, hash: versionId, liveAudioProcessed: false } }
+  async getStatus() { return { engine: 'equalizer-apo', mode: 'sandbox_only', bypassed: this.bypassed, activeVersionId: this.history.at(-1)?.versionId ?? null, hasStagedConfiguration: this.stagedConfiguration !== null, liveAudioProcessed: false } }
+  async ensureSandbox() { await mkdir(this.root, { recursive: true }); if ((await lstat(this.root)).isSymbolicLink()) throw new Error('SANDBOX_ROOT_SYMLINK_DENIED') }
+  async safeFile(name) { await this.ensureSandbox(); const candidate = path.resolve(this.root, name); if (path.relative(this.root, candidate).startsWith('..') || path.isAbsolute(path.relative(this.root, candidate))) throw new Error('SANDBOX_PATH_DENIED'); try { if ((await lstat(candidate)).isSymbolicLink()) throw new Error('SANDBOX_SYMLINK_DENIED') } catch (cause) { if (cause.code !== 'ENOENT') throw cause } return candidate }
+  async getConfiguration() { try { return { text: await readFile(await this.safeFile('active.txt'), 'utf8') } } catch { return null } }
+  async stageConfiguration(config) { const validation = this.validateConfiguration(config); if (!validation.ok) return { ok: false, staged: false, errors: validation.errors }; this.stagedConfiguration = structuredClone(config); return { ok: true, staged: true, applied: false, liveAudioProcessed: false } }
+  async applyConfiguration(config) { const text = serializeEqualizerApo(config); const active = await this.safeFile('active.txt'); const staged = await this.safeFile(`staged-${Date.now()}.txt`); const backup = await this.safeFile('active.previous.txt'); try { await readFile(active); await copyFile(active, backup) } catch (cause) { if (cause.code !== 'ENOENT') throw cause }; await writeFile(staged, text, { flag: 'wx' }); await rename(staged, active); this.stagedConfiguration = null; const versionId = hash(text); this.history.push({ versionId, backup }); return { ok: true, status: 'sandbox_applied', versionId, hash: versionId, liveAudioProcessed: false } }
   async bypass(enabled) { this.bypassed = Boolean(enabled); return { ok: true, status: 'sandbox_bypass', bypassed: this.bypassed, liveAudioProcessed: false } }
-  async rollback() { const active = path.join(this.root, 'active.txt'); const backup = path.join(this.root, 'active.previous.txt'); await copyFile(backup, active); return { ok: true, status: 'sandbox_rolled_back', liveAudioProcessed: false } }
+  async rollback() { const active = await this.safeFile('active.txt'); const backup = await this.safeFile('active.previous.txt'); await copyFile(backup, active); return { ok: true, status: 'sandbox_rolled_back', liveAudioProcessed: false } }
 }

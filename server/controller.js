@@ -83,7 +83,7 @@ export function createControllerHandler({ dataFile = path.join(__dirname, '..', 
         if (url.pathname === '/api/dsp/config') return json(res, 200, await dspAdapter.getConfiguration())
         if (url.pathname === '/api/dsp/history') return json(res, 200, { history: dspAdapter.history ?? [] })
       }
-      if (req.method === 'POST') { try { const body = await readBody(req); if (url.pathname === '/api/dsp/validate') return json(res, 200, dspAdapter.validateConfiguration(body)); if (url.pathname === '/api/dsp/stage' || url.pathname === '/api/dsp/apply') return json(res, 200, await dspAdapter.applyConfiguration(body)); if (url.pathname === '/api/dsp/bypass') return json(res, 200, await dspAdapter.bypass(body.enabled)); if (url.pathname === '/api/dsp/rollback') return json(res, 200, await dspAdapter.rollback(body.versionId)) } catch (cause) { return error(res, 400, 'INVALID_DSP_REQUEST', cause.message) } }
+      if (req.method === 'POST') { try { const body = await readBody(req); if (url.pathname === '/api/dsp/validate') return json(res, 200, dspAdapter.validateConfiguration(body)); if (url.pathname === '/api/dsp/stage') return json(res, 200, await dspAdapter.stageConfiguration(body)); if (url.pathname === '/api/dsp/apply') return json(res, 200, await dspAdapter.applyConfiguration(body)); if (url.pathname === '/api/dsp/bypass') return json(res, 200, await dspAdapter.bypass(body.enabled)); if (url.pathname === '/api/dsp/rollback') return json(res, 200, await dspAdapter.rollback(body.versionId)) } catch (cause) { return error(res, 400, 'INVALID_DSP_REQUEST', cause.message) } }
       return error(res, 404, 'DSP_ROUTE_NOT_FOUND', 'Unknown DSP API route')
     }
     if (url.pathname === '/sonos-store') {
