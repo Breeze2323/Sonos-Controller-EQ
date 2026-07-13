@@ -11,6 +11,7 @@ Updated: 2026-07-13T04:10:00-06:00
 - Latest implementation checkpoint: `4aa50809325c01044600ec188182f69e937388f9`
 - Subsequent pushed checkpoints: `cebd218` (separate staging), `623c87a` (DSP panel), `2029318` (REW preview API), `f5714f3` (REW UI preview), and `feb11f7` (validated Sonos controls).
 - Latest implementation checkpoints: `ccfd7cf` (parametric/presets/A-B/source UI), `fb3afae` (read-only capability view), `02edad0` (preview-only scheduler), `8681cdf` (REW audit persistence), and `f61a78b` (save DSP draft to unified profile).
+- Latest safety checkpoints: `74b6d22` makes inherited quick-control, transport, grouping, session, and slider actions preview-only; `12af627` makes the legacy bulk profile-apply hook return a structured preview-only block with no network requests.
 - Draft PR: [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5), targeting `main`
 - Exact-head CI: `fb3afae` is green on Ubuntu/Windows and Node 20/22. CI for `8681cdf` and `f61a78b` is pending GitHub completion.
 - Worktree was clean before the profile-migration checkpoint.
@@ -34,6 +35,7 @@ Updated: 2026-07-13T04:10:00-06:00
 - The DSP tab supplies 15/31-band graphic controls, response/headroom estimates, and sandbox/mock-only stage, apply, and bypass actions. It also previews REW text and imports filters only into the in-memory draft.
 - The REW API route is preview-only and returns explicit `applied: false` and `liveAudioProcessed: false` evidence.
 - Sonos native control validation covers loudness, Sub, surround, night/speech, and dialog sync inputs, but writes remain blocked by default and were not invoked.
+- A source scan found no remaining targeted direct mutation proxy calls in `src`; read-only metadata, queue, artwork, and capability requests remain separately scoped.
 - Scheduled profile matches now emit preview/audit results instead of invoking the legacy live profile-apply path.
 - REW imports retain bounded deduplicated local audit entries with hashes and normalized filters; an explicit action can save the DSP draft, coverage state, and import hash into the active profile without applying it.
 
@@ -56,6 +58,7 @@ $env:PATH="$nodeBin;$override;$fallback;$env:PATH"
 2. Add component-level or browser-level coverage for the DSP/REW/native capability surfaces, and extend negative/security coverage.
 3. Review the remaining inherited direct Sonos-write UI paths and make their pre-live policy explicit without breaking future approval-gated architecture.
 4. Perform a requirement-by-requirement hostile completion audit and update documentation with verified limitations and named gates.
+5. Do not claim completion: a real live endpoint canary, live Sonos-write validation, and production deployment remain named approval gates.
 
 ## Safety and approval gates
 

@@ -6,6 +6,8 @@ Continue from `agent/prelive-audio-control-stack` after the profile/DSP/REW chec
 
 Complete one coherent, software-only checkpoint: add test coverage and conduct a hostile security/completeness audit of the DSP, REW, scheduler, and native-control surfaces. This is not authorization for live Sonos, DSP, Equalizer APO, audio-endpoint, or production-controller mutation.
 
+First verify CI for `12af6279f1400d7e4104bb6a6e90417690f2490b`; it removes the final inherited bulk profile-apply network path. Then inspect remaining read-only proxy consumers and add coverage for policy-blocked writes before any completion audit.
+
 ## Start here
 
 1. Inspect `server/controller.js`, `server/services/dsp/MockDspAdapter.js`, `server/services/dsp/EqualizerApoAdapter.js`, and their tests.
