@@ -7,7 +7,11 @@
 - Conservative headroom estimation exists.
 - Read-only Windows readiness inventory exists.
 - Unit tests and cross-platform CI scaffolding exist.
-- The repository foundation was locally reconstructed and validated before publication: JavaScript syntax passed, 9 Node tests passed, and the structure gate passed.
+- Verified upstream seed: `main`, `origin/main`, and `upstream/main` are `fb3f7cca1bc920dace501cd7ff564e526aa8eec5`.
+- The imported React/Vite controller builds with the pinned `node-sonos-http-api` source archive.
+- The bounded controller proxy reaches a configured `127.0.0.1` mock API and rejects a different target.
+- Store POST rejects malformed JSON and preserves existing keys through an atomic sibling-file write and backup.
+- Deterministic lint, unit/integration tests, build, and secret scan exist; mocks are not live audio or Sonos validation.
 
 ## Live-verified GitHub state
 
@@ -42,6 +46,17 @@ These remain operator-reported until reverified by the active Codex worktree.
 - Windows spatial-audio/Atmos behavior.
 - Live Arc Ultra capability ranges beyond current readback.
 - Production deployment and reboot validation.
+
+## First live canary packet (do not execute)
+
+Required approval token: `LIVE_DSP_CANARY_APPROVAL_REQUIRED`.
+
+- Select and record one Windows playback endpoint identifier and Equalizer APO version.
+- Back up the exact controller-owned include file before any write.
+- Start at a conservative low volume; use shared stereo PCM and a short known test source.
+- Apply one reversible conservative filter (for example, `Preamp: -6 dB` with a narrow `+1 dB` peak), then capture endpoint, engine-load, audible/measured result, timestamp, and hashes.
+- Timeout or uncertain result: do not retry; restore the known-good backup manually or through the verified rollback path.
+- Stop immediately on wrong endpoint, unexpected playback behavior, clipping, lost audio, unsupported path, or failed rollback; remove the canary include after evidence capture.
 
 ## Next gate
 
