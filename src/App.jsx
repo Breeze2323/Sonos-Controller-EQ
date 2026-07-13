@@ -17,6 +17,7 @@ import Scheduler from './components/Scheduler'
 import ConnectionConfig from './components/ConnectionConfig'
 import ActivityLog from './components/ActivityLog'
 import DspPanel from './components/DspPanel'
+import NativeControls from './components/NativeControls'
 
 // ===== Toast System =====
 let toastIdCounter = 0
@@ -534,6 +535,11 @@ export default function App() {
                   </div>
                 )}
               </div>
+            </div>
+
+            <div className="settings-section">
+              <div className="settings-section-title">Native Sonos capabilities</div>
+              <NativeControls room={config.room} />
             </div>
 
             <div className="settings-section">
