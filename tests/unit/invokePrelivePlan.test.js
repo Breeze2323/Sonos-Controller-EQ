@@ -1,37 +1,14 @@
 import assert from 'node:assert/strict'
-import { execFileSync, execSync } from 'node:child_process'
-import path from 'node:path'
 import test from 'node:test'
 
-const repoRoot = path.resolve('E:/Git/Sonos-Controller-EQ')
-const scriptPath = path.join(repoRoot, 'scripts/windows/Invoke-PrelivePlan.ps1')
+import { evaluatePrelivePlan, parsePrelivePlanArgs } from '../../scripts/windows/invokePrelivePlan.mjs'
 
 function runPlan(args) {
-  const out = execFileSync(
-    'powershell',
-    ['-NoLogo', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', scriptPath, ...args],
-    { cwd: repoRoot, encoding: 'utf8' },
-  )
-  const text = String(out).trim()
-  const start = text.lastIndexOf('{')
-  if (start < 0) {
-    throw new Error(`plan command did not emit JSON: ${text}`)
-  }
-  return JSON.parse(text.slice(start))
+  return evaluatePrelivePlan(parsePrelivePlanArgs(args))
 }
 
-function runPlanFails(args) {
-  try {
-    execSync(
-      `powershell -NoLogo -NonInteractive -ExecutionPolicy Bypass -File "${scriptPath}" ${args.join(' ')}`,
-      { cwd: repoRoot, encoding: 'utf8', stdio: 'pipe' },
-    )
-    assert.fail('Expected plan invocation to fail')
-  } catch (error) {
-    assert.equal(Boolean(error?.status), true)
-    const text = String(error?.stderr ?? error?.stdout ?? '')
-    return text
-  }
+function runPlanFails(args, expectedError) {
+  assert.throws(() => runPlan(args), expectedError)
 }
 
 test('Invoke-PrelivePlan rejects wrong or missing approval token', () => {
@@ -47,13 +24,12 @@ test('Invoke-PrelivePlan rejects wrong or missing approval token', () => {
 })
 
 test('Invoke-PrelivePlan rejects missing required token parameter', () => {
-  const err = runPlanFails([
+  runPlanFails([
     '-Action', 'EQUALIZER_APO_INSTALLATION',
     '-TargetIdentity', 'beast2-controller',
     '-CurrentStateHash', '0123456789abcdef',
     '-BackupHash', '0011223344556677',
-  ])
-  assert.match(err, /ApprovalToken/)
+  ], /ApprovalToken/)
 })
 
 test('Invoke-PrelivePlan enforces action-specific token scope', () => {

@@ -1,6 +1,6 @@
 # Current Handoff: Pre-live operator-readiness checkpoint
 
-Updated: 2026-07-13T12:52:18-06:00
+Updated: 2026-07-13T12:56:10-06:00
 
 ## Live-verified state
 
@@ -9,7 +9,7 @@ Updated: 2026-07-13T12:52:18-06:00
 - Base/main SHA: `213e04612fc24a869988f9de1a5ec6707406dde8` (`main`)
 - Starting checkpoint SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
 - Draft PR: [#6](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/6), state `OPEN`, title `Continue pre-live Sonos native and DSP control stack`
-- Current local branch SHA: `fcda1e9b4d473128349cba2593c696455ad98316`
+- Current local branch SHA: `b5fecc917a246e0f2edaff144e6dbffafa3af78a`
 
 ## Completed bounded checkpoints (since earlier handoff)
 
@@ -41,10 +41,10 @@ Updated: 2026-07-13T12:52:18-06:00
   - Default shell node command reports `v18.20.8 / 10.8.2`.
 - Verification commands run in this checkpoint:
 - `npm run lint`
-- `npm test` (passes: 31 Node tests)
+- `npm test` (passes: 36 Node tests)
 - `npm run build`
 - `npm run secret-scan`
-- `npm run check` (passes: lint + 31 node tests + 2 UI tests + build + secret-scan)
+- `npm run check` (passes: lint + 36 node tests + 2 UI tests + build + secret-scan)
 - PowerShell parser validation for `*.ps1` scripts passed.
 - Readiness/discovery/disposable/runbook commands run in this checkpoint:
   - `.\scripts\windows\Test-DspReadiness.ps1 -CheckLoopbackServices -OutputPath reports\\local-dsp-readiness-20260713-064234.json`
