@@ -4,6 +4,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { HttpSonosAdapter } from './services/sonos/HttpSonosAdapter.js'
 import { MockDspAdapter } from './services/dsp/MockDspAdapter.js'
+import { parseRewText } from './rew/parse.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const MAX_BODY = 256 * 1024
@@ -85,6 +86,16 @@ export function createControllerHandler({ dataFile = path.join(__dirname, '..', 
       }
       if (req.method === 'POST') { try { const body = await readBody(req); if (url.pathname === '/api/dsp/validate') return json(res, 200, dspAdapter.validateConfiguration(body)); if (url.pathname === '/api/dsp/stage') return json(res, 200, await dspAdapter.stageConfiguration(body)); if (url.pathname === '/api/dsp/apply') return json(res, 200, await dspAdapter.applyConfiguration(body)); if (url.pathname === '/api/dsp/bypass') return json(res, 200, await dspAdapter.bypass(body.enabled)); if (url.pathname === '/api/dsp/rollback') return json(res, 200, await dspAdapter.rollback(body.versionId)) } catch (cause) { return error(res, 400, 'INVALID_DSP_REQUEST', cause.message) } }
       return error(res, 404, 'DSP_ROUTE_NOT_FOUND', 'Unknown DSP API route')
+    }
+    if (url.pathname === '/api/rew/parse') {
+      if (req.method !== 'POST') return error(res, 405, 'METHOD_NOT_ALLOWED', 'Only POST is supported')
+      try {
+        const body = await readBody(req)
+        if (!plainObject(body) || typeof body.text !== 'string') return error(res, 400, 'INVALID_REW_REQUEST', 'REW text is required')
+        return json(res, 200, { ...parseRewText(body.text), applied: false, liveAudioProcessed: false })
+      } catch (cause) {
+        return error(res, cause.code === 'TOO_LARGE' ? 413 : 400, 'INVALID_REW_REQUEST', cause.message)
+      }
     }
     if (url.pathname === '/sonos-store') {
       if (req.method === 'GET') { try { return json(res, 200, await readStore(dataFile)) } catch { return error(res, 500, 'STORE_MALFORMED', 'Stored controller data is malformed') } }
