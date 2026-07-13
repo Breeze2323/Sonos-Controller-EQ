@@ -1,6 +1,6 @@
 # Current Handoff: Pre-live operator-readiness checkpoint
 
-Updated: 2026-07-13T12:55:32-06:00
+Updated: 2026-07-13T13:00:22-06:00
 
 ## Live-verified state
 
@@ -9,21 +9,23 @@ Updated: 2026-07-13T12:55:32-06:00
 - Base/main SHA: `213e04612fc24a869988f9de1a5ec6707406dde8` (`main`)
 - Starting checkpoint SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
 - Draft PR: [#6](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/6), state `OPEN`, title `Continue pre-live Sonos native and DSP control stack`
-- Current local branch SHA: `b40491984588d0b67451b22dc344889bba732f7f`
+- Current local branch SHA: `43fe9be62daf6dba9926e994829945a3034fe63f`
 
 ## Completed bounded checkpoints (since earlier handoff)
 
 - Read-only Beast2 readiness report executed (`Test-DspReadiness.ps1`) and summarized in
-  `docs/evidence/READ_ONLY_BEAST2_READINESS.md`.
+  `docs/evidence/READ_ONLY_BEAST2_READINESS.md`:
+  `reports/local-dsp-readiness-20260713-065749.json`.
 - Explicit Equalizer APO candidate-path probe results captured in
   `docs/evidence/APO_READINESS_EXPLICIT_PATH_PROBE.md`.
 - Live loopback Sonos discovery executed against `127.0.0.1:5005` and summarized in
-  `docs/evidence/READ_ONLY_SONOS_DISCOVERY.md`.
+  `docs/evidence/READ_ONLY_SONOS_DISCOVERY.md` (`GET /zones` + `Living%20Room/state`).
 - Scoped disposable pre-live harness executed; latest evidence:
-  `artifacts/disposable-prelive-20260713-064246/artifacts/disposable-prelive-1783946571509.json`
+  `artifacts/disposable-prelive-20260713-0660/artifacts/disposable-prelive-1783947519803.json`
   (`pass=23`, `fail=0`, `skip=2`).
 - Release packaging verified both in-repo artifact (`artifacts/releases/0.1.0/20260713-064301`)
-  and external temp scratch (`%TEMP%\\prelive-release-ext-*`) through `New-ReleasePackage.ps1` + `Test-ReleasePackage.ps1`.
+  and deterministic scratch (`artifacts/releases/0.1.0-test-run/0.1.0/20260713-065812`) through
+  `New-ReleasePackage.ps1` + `Test-ReleasePackage.ps1`.
 - Approval packet documentation updated under `docs/approval/PACKETS.md`.
 - `scripts/windows/Invoke-PrelivePlan.ps1` fail-closed validation scenarios re-run and reported expected plan/deny outputs.
 
