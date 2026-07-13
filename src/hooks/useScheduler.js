@@ -36,7 +36,7 @@ export function formatNextActivation(schedule) {
   return `in ${diffDays}d`
 }
 
-export function useScheduler({ profiles, config, applyProfile, onAutoApply }) {
+export function useScheduler({ profiles, onSchedulePreview }) {
   const [schedules, setSchedulesState] = useState(() =>
     lsGet('sonos-schedules', [])
   )
@@ -99,12 +99,14 @@ export function useScheduler({ profiles, config, applyProfile, onAutoApply }) {
         const profile = profiles.find((p) => p.id === schedule.profileId)
         if (!profile) continue
 
-        try {
-          const result = await applyProfile(config, profile)
-          if (onAutoApply) onAutoApply(profile, result)
-        } catch (e) {
-          console.warn('Auto-apply failed:', e)
-        }
+        // Scheduled execution remains preview-only until a separate explicit
+        // LIVE_SONOS_WRITE_APPROVAL_REQUIRED gate is granted.
+        if (onSchedulePreview) onSchedulePreview(profile, {
+          ok: false,
+          status: 'preview_only',
+          code: 'LIVE_SONOS_WRITES_DISABLED',
+          liveAudioProcessed: false,
+        })
       }
 
       // Clean up old lastTriggered keys (keep only last 100)
@@ -118,7 +120,7 @@ export function useScheduler({ profiles, config, applyProfile, onAutoApply }) {
     check() // run immediately
     const interval = setInterval(check, 30000)
     return () => clearInterval(interval)
-  }, [schedules, profiles, config, applyProfile, onAutoApply])
+  }, [schedules, profiles, onSchedulePreview])
 
   return {
     schedules,

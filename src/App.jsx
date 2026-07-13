@@ -126,7 +126,7 @@ export default function App() {
   const [applyingId, setApplyingId] = useState(null)
   const [liveCollapsed, setLiveCollapsed] = useState(false)
   const contentRef = useRef(null)
-  const [autoAppliedId, setAutoAppliedId] = useState(null)
+  const [autoAppliedId] = useState(null)
   const { toasts, addToast } = useToasts()
   const { entries: logEntries, addEntry, clearLog } = useActivityLog()
   // Ref always mirrors appliedProfile so callbacks don't need it in their deps
@@ -207,22 +207,10 @@ export default function App() {
     if (activeProfile) handleApply(activeProfile)
   }, [activeProfile, handleApply])
 
-  const handleAutoApply = useCallback((profile, result) => {
-    if (result.ok) {
-      addEntry({
-        type: 'schedule_fired',
-        action: 'Schedule Fired',
-        what: profile.name,
-        before: appliedProfileRef.current?.name ?? null,
-        after: profile.name,
-      })
-      setActiveProfileId(profile.id)
-      setAppliedAt(Date.now())
-      setAppliedProfile(profile)
-      setAutoAppliedId(profile.id)
-      addToast(`Auto-applied: ${profile.name}`, 'info')
-    }
-  }, [setActiveProfileId, addToast, addEntry])
+  const handleSchedulePreview = useCallback((profile, result) => {
+    addEntry({ type: 'schedule_preview', action: 'Schedule preview', what: profile.name, before: null, after: result.code })
+    addToast(`Schedule for "${profile.name}" was previewed; live writes are disabled.`, 'info', 6000)
+  }, [addEntry, addToast])
 
   const handleSessionStart = useCallback((volume) => {
     const base = `http://${config.host}:${config.port}`
@@ -276,9 +264,7 @@ export default function App() {
 
   const { schedules, addSchedule, updateSchedule, deleteSchedule } = useScheduler({
     profiles,
-    config,
-    applyProfile,
-    onAutoApply: handleAutoApply,
+    onSchedulePreview: handleSchedulePreview,
   })
 
   const handleCaptureFromSonos = useCallback(async () => {
