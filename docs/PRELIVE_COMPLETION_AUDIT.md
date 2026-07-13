@@ -13,9 +13,9 @@ This audit distinguishes implemented software evidence from approval-gated live 
 | DSP UI | 15/31 band EQ, parametric filters, response estimate, preamp/headroom, clipping status, A/B slots, presets, bypass, source coverage | Implemented local draft/sandbox |
 | Unified profiles and schedule | versioned migration, DSP draft association, malformed-entry retention; schedule action emits a preview audit event | Implemented pre-live |
 | REW | bounded parser, preview route, UI preview/import, bounded deduplicated local audit | Implemented pre-live |
-| Regression/security validation | `npm run check`: 30 Node tests, 2 jsdom UI tests, lint, build, secret scan; source scan found no targeted direct write proxy invocation | Local evidence |
+| Regression/security validation | `npm run check`: 31 Node tests, 2 jsdom UI tests, lint, build, secret scan; source scan found no targeted direct write proxy invocation | Local evidence |
 | Read-only readiness evidence | Beast2 readiness script + Sonos/API discovery + APO explicit-path probe evidence generated in this checkpoint | Repository-proven evidence |
-| CI and PR | Draft PR #6, exact-head CI green on Node 20/22 for Ubuntu/Windows at `29240084875`; pending re-run after this checkpoint push | Local checkpoint evidence |
+| CI and PR | Draft PR #6, exact-head CI green on Node 20/22 for Ubuntu/Windows at `29251018848`; latest branch head `fcda1e9b4d473128349cba2593c696455ad98316` | Local checkpoint evidence |
 
 ## Remaining approval-gated work
 
@@ -28,8 +28,9 @@ This audit distinguishes implemented software evidence from approval-gated live 
 
 ## Unverified or incomplete evidence
 
-- Two jsdom component tests cover the DSP draft and disabled native-write UI. No physical-device end-to-end test has been run.
-- The legacy controller's read-only metadata proxy paths remain available by design; they are not evidence of a live integration test.
+- Fail-closed planning behavior is now unit-tested with `tests/unit/invokePrelivePlan.test.js`.
+- Disposable harness evidence has completed all currently executable scenarios in this lane; remaining schedule-related scenarios are blocked-by-design due missing persistent schedule control endpoints in the synthetic API.
+- The legacy controller's read-only metadata proxy paths remain available by design; they are not evidence of live integration capability.
 - Equalizer APO readiness is sandbox-only. The adapter has not inspected a real installation or endpoint.
 - A read-only live Sonos discovery request was performed against `127.0.0.1:5005` (`/zones` and `/<room>/state`) and used for capability evidence. No Sonos write path was attempted.
 

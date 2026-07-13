@@ -1,6 +1,6 @@
 # Current Handoff: Pre-live operator-readiness checkpoint
 
-Updated: 2026-07-13T06:44:10-06:00
+Updated: 2026-07-13T12:52:18-06:00
 
 ## Live-verified state
 
@@ -9,7 +9,7 @@ Updated: 2026-07-13T06:44:10-06:00
 - Base/main SHA: `213e04612fc24a869988f9de1a5ec6707406dde8` (`main`)
 - Starting checkpoint SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
 - Draft PR: [#6](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/6), state `OPEN`, title `Continue pre-live Sonos native and DSP control stack`
-- Current local branch SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
+- Current local branch SHA: `fcda1e9b4d473128349cba2593c696455ad98316`
 
 ## Completed bounded checkpoints (since earlier handoff)
 
@@ -40,26 +40,32 @@ Updated: 2026-07-13T06:44:10-06:00
   - `node v24.14.0` / `npm 10.8.2` when using the configured runtime path.
   - Default shell node command reports `v18.20.8 / 10.8.2`.
 - Verification commands run in this checkpoint:
-  - `npm run lint`
-  - `npm test`
-  - `npm run build`
-  - `npm run secret-scan`
-  - `npm run check` (passes: lint + 30 node tests + 2 UI tests + build + secret-scan)
-  - PowerShell parser validation for `*.ps1` scripts passed.
+- `npm run lint`
+- `npm test` (passes: 31 Node tests)
+- `npm run build`
+- `npm run secret-scan`
+- `npm run check` (passes: lint + 31 node tests + 2 UI tests + build + secret-scan)
+- PowerShell parser validation for `*.ps1` scripts passed.
 - Readiness/discovery/disposable/runbook commands run in this checkpoint:
   - `.\scripts\windows\Test-DspReadiness.ps1 -CheckLoopbackServices -OutputPath reports\\local-dsp-readiness-20260713-064234.json`
   - loopback `GET /zones` and `/<room>/state` on `127.0.0.1:5005`
   - explicit APO probe with absolute paths + rejected relative path
   - `.\scripts\Test-DisposablePrelive.ps1` (non-production synthetic stack)
-  - `.\scripts\windows\Invoke-PrelivePlan.ps1` mismatched and matching plan-token scenarios
+  - `.\scripts\windows\Invoke-PrelivePlan.ps1` behavior assertions via `tests/unit/invokePrelivePlan.test.js` (wrong token, cross-token, path escape, stale hashes, missing backup, uncertain prior state, plan mode non-mutation)
 
 ## Incomplete/non-final work
 
-1. Hostile-review expansion for route/behavior gaps not yet exhaustive.
-2. Broader disposable scenario matrix (scheduler persistence, duplicate suppression, crash-recovery) is partially documented but not yet all automated.
-3. Fail-closed planner and approval artifacts are documented but not yet covered by unit tests.
+1. Broader disposable scenario matrix remains blocked-by-design (`schedule preview` and `duplicate schedule suppression`) until schedule persistence routes exist in the backend API.
+2. Hostile review is completed for current lanes and documented in `docs/evidence/HOSTILE_REVIEW.md` with no blocking issues in this branch.
+3. PR/issue and approval-gated live action state is still pending external authorization.
 
 ## Safety and approval gates
 
 - No live production controller requests, Sonos writes, Windows endpoint mutation, APO installation, or production deployment were performed.
-- Next non-code gate remains `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED`; live DSP and Sonos-write gates remain active.
+- Next approval gates remain:
+  - `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED`
+  - `WINDOWS_AUDIO_ENDPOINT_MUTATION_APPROVAL_REQUIRED`
+  - `LIVE_DSP_CANARY_APPROVAL_REQUIRED`
+  - `LIVE_SONOS_WRITE_APPROVAL_REQUIRED`
+  - `PRODUCTION_CONTROLLER_DEPLOYMENT_APPROVAL_REQUIRED`
+  - `PR_REVIEW_AND_MERGE_APPROVAL_REQUIRED`
