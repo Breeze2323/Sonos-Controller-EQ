@@ -3,6 +3,8 @@ import { createFlatGraphicEq } from '../lib/dsp/graphicEq'
 import { assessHeadroom } from '../lib/dsp/headroom'
 import { estimateResponse } from '../lib/dsp/response'
 import { DEFAULT_SOURCE_COVERAGE } from '../../shared/domain/sourceCoverage'
+import { appendRewAudit } from '../lib/rewAudit'
+import { lsGet, lsSet, saveKey } from '../lib/fileStore'
 
 const PRESETS = {
   flat: () => initialConfiguration(),
@@ -25,6 +27,7 @@ export default function DspPanel() {
   const [result, setResult] = useState(null)
   const [rewText, setRewText] = useState('')
   const [rewPreview, setRewPreview] = useState(null)
+  const [rewAudit, setRewAudit] = useState(() => lsGet('rew-import-audit', []))
   const [slotA, setSlotA] = useState(null)
   const [slotB, setSlotB] = useState(null)
   const response = useMemo(() => estimateResponse(configuration), [configuration])
@@ -42,6 +45,12 @@ export default function DspPanel() {
   const importRewDraft = () => {
     if (!rewPreview?.ok) return
     setConfiguration((current) => ({ ...current, preampDb: rewPreview.preampDb ?? current.preampDb, parametricEq: { filters: rewPreview.filters } }))
+    setRewAudit((previous) => {
+      const next = appendRewAudit(previous, rewPreview)
+      lsSet('rew-import-audit', next)
+      saveKey('rew-import-audit', next)
+      return next
+    })
     setResult({ ok: true, importedToDraft: true, applied: false, liveAudioProcessed: false, importHash: rewPreview.importHash })
   }
   const addFilter = () => setConfiguration((current) => ({ ...current, parametricEq: { filters: [...current.parametricEq.filters, { id: `filter-${Date.now()}`, enabled: true, type: 'peak', frequencyHz: 1000, gainDb: 0, q: 1 }] } }))
@@ -83,6 +92,7 @@ export default function DspPanel() {
           <textarea aria-label="REW filter text" value={rewText} onChange={(event) => setRewText(event.target.value)} placeholder={'Preamp: -4 dB\nFilter 1: ON PK Fc 100 Hz Gain 3 dB Q 1.4'} rows={5} style={{ width: '100%', resize: 'vertical' }} />
           <div style={{ display: 'flex', gap: 8 }}><button className="btn btn-secondary" onClick={previewRew}>Preview REW filters</button><button className="btn btn-primary" disabled={!rewPreview?.ok} onClick={importRewDraft}>Import into draft</button></div>
           {rewPreview && <div aria-live="polite" style={{ fontSize: 12 }}>{rewPreview.ok ? `${rewPreview.filters.length} filters validated; hash ${rewPreview.importHash.slice(0, 12)}…` : rewPreview.errors?.map((error) => `Line ${error.line}: ${error.message}`).join('; ')}</div>}
+          {rewAudit.length > 0 && <div style={{ fontSize: 11, color: 'var(--text-muted)' }}>Audit: {rewAudit.length} local import{rewAudit.length === 1 ? '' : 's'} retained; latest {rewAudit.at(-1).importHash.slice(0, 12)}…</div>}
         </div>
       </div>
       <div className="settings-section">
