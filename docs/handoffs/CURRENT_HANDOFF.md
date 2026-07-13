@@ -1,6 +1,6 @@
 # Current Handoff: Pre-live operator-readiness checkpoint
 
-Updated: 2026-07-13T07:42:30-06:00
+Updated: 2026-07-13T07:45:00-06:00
 
 ## Live-verified state
 
@@ -9,7 +9,7 @@ Updated: 2026-07-13T07:42:30-06:00
 - Base/main SHA: `213e04612fc24a869988f9de1a5ec6707406dde8` (`main`)
 - Starting checkpoint SHA: `1728297c914937eb116fc6da7e50fdfb6aab69e9`
 - Draft PR: [#6](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/6), state `OPEN`, title `Complete pre-live Sonos and DSP control stack`
-- Current local branch SHA: `086b22e04e2e47338decf665367c267c08b85ca1`
+- Current local branch SHA: `48fb117154dfaf3395d4e39e2332a9302f17c322`
 
 ## Completed bounded checkpoints (since earlier handoff)
 
