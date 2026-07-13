@@ -1,10 +1,10 @@
-# Next GPT Task: complete DSP UI and safe REW persistence
+# Next GPT Task: test and audit the completed pre-live control surfaces
 
-Continue from `agent/prelive-audio-control-stack` after the profile migration checkpoint `4aa50809325c01044600ec188182f69e937388f9` and its accompanying handoff-update commit (draft PR [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5)). Do not switch branches, force-push, merge, mark the PR ready, or modify `main`.
+Continue from `agent/prelive-audio-control-stack` after the profile/DSP/REW checkpoint `f61a78bd4e620364aaf991e42ce4f228b132f232` and this accompanying handoff-update commit (draft PR [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5)). Do not switch branches, force-push, merge, mark the PR ready, or modify `main`.
 
 ## Objective
 
-Complete one coherent, software-only checkpoint: add parametric filters, presets/A-B state, source coverage, and REW import persistence/audit to the DSP experience. This is not authorization for live Sonos, DSP, Equalizer APO, audio-endpoint, or production-controller mutation.
+Complete one coherent, software-only checkpoint: add test coverage and conduct a hostile security/completeness audit of the DSP, REW, scheduler, and native-control surfaces. This is not authorization for live Sonos, DSP, Equalizer APO, audio-endpoint, or production-controller mutation.
 
 ## Start here
 
