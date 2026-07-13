@@ -1,6 +1,6 @@
 # Current Handoff: Pre-live audio control stack
 
-Updated: 2026-07-13T03:12:00-06:00
+Updated: 2026-07-13T03:35:00-06:00
 
 ## Live-verified state
 
@@ -9,8 +9,9 @@ Updated: 2026-07-13T03:12:00-06:00
 - Base: `1ee1eb396c97ae2d26a17bcba199b4ca295db918` (`main`)
 - Last pushed handoff checkpoint: `ea18ca9`
 - Latest implementation checkpoint: `4aa50809325c01044600ec188182f69e937388f9`
+- Subsequent pushed checkpoints: `cebd218` (separate staging), `623c87a` (DSP panel), `2029318` (REW preview API), `f5714f3` (REW UI preview), and `feb11f7` (validated Sonos controls).
 - Draft PR: [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5), targeting `main`
-- Exact-head CI: `ea18ca9` is green. Both Node 20 and 22 on Ubuntu and Windows completed successfully (two workflow runs, eight checks total). CI for `4aa5080` is pending push.
+- Exact-head CI: `cebd218` and `623c87a` are green on Ubuntu/Windows and Node 20/22. CI for the later checkpoint sequence is pending GitHub completion.
 - Worktree was clean before the profile-migration checkpoint.
 
 ## Completed bounded checkpoints
@@ -29,6 +30,9 @@ Updated: 2026-07-13T03:12:00-06:00
 - DSP routes use the mock adapter by default. Their stage/apply semantics still need to be separated before any real adapter is considered.
 - Unified profile migration is applied at the `useProfiles` persistence boundary. Valid v1 entries are upgraded, invalid entries remain persisted and are exposed through `profileMigrationRejections`, and an early nested-only v2 shape is repaired with a temporary flat UI projection.
 - Source-coverage defaults now live in `shared/domain/sourceCoverage.js`; server consumers retain their existing import path through a re-export.
+- The DSP tab supplies 15/31-band graphic controls, response/headroom estimates, and sandbox/mock-only stage, apply, and bypass actions. It also previews REW text and imports filters only into the in-memory draft.
+- The REW API route is preview-only and returns explicit `applied: false` and `liveAudioProcessed: false` evidence.
+- Sonos native control validation covers loudness, Sub, surround, night/speech, and dialog sync inputs, but writes remain blocked by default and were not invoked.
 
 ## Local validation evidence
 
@@ -46,9 +50,9 @@ $env:PATH="$nodeBin;$override;$fallback;$env:PATH"
 ## Incomplete work and next atomic unit
 
 1. Commit and push this handoff update, then verify exact-head CI for the resulting branch head.
-2. Separate DSP configuration staging from applying in the mock route contract; staging must not claim or perform application.
-3. Strengthen Equalizer APO sandbox-path validation (allowlist/canonical-path behavior) and add focused security tests without inspecting or touching a live APO path.
-4. Commit/push the next atomic unit and update these handoffs again.
+2. Extend the DSP UI with parametric filter editing, presets, A/B draft state, source coverage, and accessible test coverage.
+3. Persist REW imports with an audit record and add profile/scheduler association without automatically applying filters.
+4. Add the capability-aware native-controls UI using only read-only capability results; preserve default write blocks.
 
 ## Safety and approval gates
 

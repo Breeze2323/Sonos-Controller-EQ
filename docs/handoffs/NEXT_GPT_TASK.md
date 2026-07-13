@@ -1,10 +1,10 @@
-# Next GPT Task: staged DSP contract and APO sandbox safety
+# Next GPT Task: complete DSP UI and safe REW persistence
 
 Continue from `agent/prelive-audio-control-stack` after the profile migration checkpoint `4aa50809325c01044600ec188182f69e937388f9` and its accompanying handoff-update commit (draft PR [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5)). Do not switch branches, force-push, merge, mark the PR ready, or modify `main`.
 
 ## Objective
 
-Complete one coherent, software-only checkpoint: separate DSP stage/apply semantics and tighten sandbox-only Equalizer APO path safety. This is not authorization for live Sonos, DSP, Equalizer APO, audio-endpoint, or production-controller mutation.
+Complete one coherent, software-only checkpoint: add parametric filters, presets/A-B state, source coverage, and REW import persistence/audit to the DSP experience. This is not authorization for live Sonos, DSP, Equalizer APO, audio-endpoint, or production-controller mutation.
 
 ## Start here
 
