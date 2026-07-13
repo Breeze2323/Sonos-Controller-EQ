@@ -6,6 +6,7 @@ export class MockDspAdapter extends DspAdapter {
   constructor(initialConfiguration = null) {
     super()
     this.configuration = initialConfiguration
+    this.stagedConfiguration = null
     this.bypassed = false
     this.history = []
   }
@@ -27,6 +28,7 @@ export class MockDspAdapter extends DspAdapter {
       available: true,
       bypassed: this.bypassed,
       activeVersionId: this.history.at(-1)?.versionId ?? null,
+      hasStagedConfiguration: this.stagedConfiguration !== null,
       liveAudioProcessed: false,
     }
   }
@@ -39,6 +41,13 @@ export class MockDspAdapter extends DspAdapter {
     return validateDspConfiguration(configuration)
   }
 
+  async stageConfiguration(configuration) {
+    const validation = this.validateConfiguration(configuration)
+    if (!validation.ok) return { ok: false, staged: false, errors: validation.errors }
+    this.stagedConfiguration = structuredClone(configuration)
+    return { ok: true, staged: true, applied: false }
+  }
+
   async applyConfiguration(configuration) {
     const validation = this.validateConfiguration(configuration)
     if (!validation.ok) {
@@ -48,6 +57,7 @@ export class MockDspAdapter extends DspAdapter {
     const versionId = randomUUID()
     this.history.push({ versionId, configuration: structuredClone(this.configuration) })
     this.configuration = structuredClone(configuration)
+    this.stagedConfiguration = null
     return { ok: true, applied: true, versionId }
   }
 

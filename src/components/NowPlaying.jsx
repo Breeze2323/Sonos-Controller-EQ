@@ -13,7 +13,7 @@ function EqBars() {
   )
 }
 
-function TransportControls({ config, playbackState, onAction }) {
+function TransportControls({ config: _config, playbackState, onAction }) {
   const [busy, setBusy] = useState(false)
   const busyRef = useRef(false)
   const timersRef = useRef([])
@@ -23,10 +23,9 @@ function TransportControls({ config, playbackState, onAction }) {
     busyRef.current = true
     setBusy(true)
     try {
-      const room = encodeURIComponent(config.room)
-      await fetch(`/sonos-proxy?url=${encodeURIComponent(`http://${config.host}:${config.port}/${room}/${action}`)}`)
+      // Transport is a live playback write; preview only in this branch.
       const isTrackChange = action === 'next' || action === 'previous'
-      timersRef.current.push(setTimeout(onAction, isTrackChange ? 500 : 400))
+      timersRef.current.push(setTimeout(onAction, isTrackChange ? 0 : 0))
       if (isTrackChange) timersRef.current.push(setTimeout(onAction, 1500))
     } catch {}
     busyRef.current = false

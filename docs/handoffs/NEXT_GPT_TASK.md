@@ -1,27 +1,34 @@
-# Next GPT Task: staged DSP contract and APO sandbox safety
+# Next GPT Task: operator-readiness completion checkpoint
 
-Continue from `agent/prelive-audio-control-stack` after the profile migration checkpoint `4aa50809325c01044600ec188182f69e937388f9` and its accompanying handoff-update commit (draft PR [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5)). Do not switch branches, force-push, merge, mark the PR ready, or modify `main`.
+Continue on `agent/prelive-audio-control-stack` (do not switch branches, force-push, merge, or modify `main`).
 
 ## Objective
 
-Complete one coherent, software-only checkpoint: separate DSP stage/apply semantics and tighten sandbox-only Equalizer APO path safety. This is not authorization for live Sonos, DSP, Equalizer APO, audio-endpoint, or production-controller mutation.
+Complete `agent/prelive-audio-control-stack` operator-readiness closure for the bounded non-live lane, then pause at explicit live gates after pushing verification evidence.
 
-## Start here
+## Priority tasks
 
-1. Inspect `server/controller.js`, `server/services/dsp/MockDspAdapter.js`, `server/services/dsp/EqualizerApoAdapter.js`, and their tests.
-2. Make `POST /api/dsp/stage` persist only a validated staged configuration. `apply` must be the explicit state-changing adapter operation; tests must prove the distinction with the mock.
-3. Validate sandbox adapter paths against the injected sandbox root before every filesystem operation, including traversal and symlink-escape cases where the platform permits them.
-4. Do not detect a real APO install, execute its configurator, or touch its active config.
+1. Verify exact-head CI remains green after this checkpoint.
+2. Keep PR #6 draft and issue #4 open while preparing final operator packet set:
+   - `EQUALIZER_APO_INSTALLATION_APPROVAL_REQUIRED`
+   - `WINDOWS_AUDIO_ENDPOINT_MUTATION_APPROVAL_REQUIRED`
+   - `LIVE_DSP_CANARY_APPROVAL_REQUIRED`
+   - `LIVE_SONOS_WRITE_APPROVAL_REQUIRED`
+   - `PRODUCTION_CONTROLLER_DEPLOYMENT_APPROVAL_REQUIRED`
+   - `PR_REVIEW_AND_MERGE_APPROVAL_REQUIRED`
+3. Perform no live writes and no production deployment until explicit gate authorization.
+4. Continue handoff/pilot documentation with exact-head branch and validation facts.
 
-## Acceptance and validation
+## Constraint reminders
 
-- Stage and apply have observable, tested, non-overlapping semantics.
-- Sandbox path rejection fails closed; no code discovers or reaches live APO locations.
-- Run focused tests, `npm run lint`, `npm test`, `npm run build`, and `npm run check` with the bundled Node 24 runtime documented in `CURRENT_HANDOFF.md`.
-- Perform a hostile review of route and filesystem boundaries and report any unresolved concern honestly.
+- No live mutation actions.
+- PR #6 remains draft and must stay draft unless explicitly authorized.
+- Never deploy or run production writes from this lane.
 
-## Continuity protocol
+## Continuation protocol
 
-After the atomic unit, update `CURRENT_HANDOFF.md` and this file with exact SHA/test/CI facts, commit the implementation plus handoff updates, push normally to `origin/agent/prelive-audio-control-stack`, and add a concise checkpoint comment to fork PR #5. Use explicit repository scoping (`--repo Breeze2323/Sonos-Controller-EQ`) because unscoped `gh` resolves the upstream repository. Verify GitHub Actions for the exact pushed head before claiming success.
-
-If interrupted or constrained, finish the smallest safe atomic unit, test it, commit/push it, and leave these handoffs accurate before stopping.
+After each atomic unit:
+- update `docs/handoffs/CURRENT_HANDOFF.md`
+- update `docs/PRELIVE_COMPLETION_AUDIT.md`
+- commit and push to `origin/agent/prelive-audio-control-stack`
+- run `gh run view <run-id>` on the branch head.

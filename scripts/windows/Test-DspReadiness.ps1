@@ -16,6 +16,23 @@ function Invoke-SafeCommandVersion {
     catch { return $null }
 }
 
+function Get-SafeHash([string]$InputString) {
+    if ([string]::IsNullOrEmpty($InputString)) { return $null }
+    try {
+        $bytes = [Text.Encoding]::UTF8.GetBytes($InputString)
+        $sha = [Security.Cryptography.SHA256]::Create().ComputeHash($bytes)
+        return [BitConverter]::ToString($sha).Replace('-', '').ToLowerInvariant()
+    }
+    catch { return $null }
+}
+
+function Resolve-ProcessByPort([int]$Port) {
+    try {
+        return Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue | Select-Object -First 1
+    }
+    catch { return $null }
+}
+
 $report = [ordered]@{
     schemaVersion = 1
     generatedAt = (Get-Date).ToString('o')
@@ -30,12 +47,23 @@ $report = [ordered]@{
         npm = Invoke-SafeCommandVersion -Command 'npm' -Arguments @('--version')
     }
     listeners = @()
+    processMetadata = @()
     audioDevices = @()
     equalizerApo = [ordered]@{
-        installed = $false
-        installPath = $null
-        configuratorPath = $null
-        configPath = $null
+        candidates = @(
+            [ordered]@{ installPath = 'C:\Program Files\EqualizerAPO'; found = $false }
+            [ordered]@{ installPath = 'C:\Program Files (x86)\EqualizerAPO'; found = $false }
+        )
+        configuratorFound = $false
+        configDirFound = $false
+    }
+    metadata = [ordered]@{
+        sonosApiDefaultPort = 5005
+        controllerDefaultPort = 3000
+        loopbackServicesChecked = $CheckLoopbackServices.IsPresent
+        defaultPlaybackEndpoint = $null
+        scheduledTaskProbed = $false
+        scheduledTaskNames = @()
     }
     unavailable = @()
 }
@@ -46,7 +74,7 @@ try {
             name = $_.Name
             manufacturer = $_.Manufacturer
             status = $_.Status
-            deviceId = $_.DeviceID
+            deviceIdHash = Get-SafeHash $_.DeviceID
         }
     })
 }
@@ -54,30 +82,61 @@ catch {
     $report.unavailable += "Win32_SoundDevice: $($_.Exception.Message)"
 }
 
-$apoCandidates = @(
-    'C:\Program Files\EqualizerAPO',
-    'C:\Program Files (x86)\EqualizerAPO'
-)
-foreach ($candidate in $apoCandidates) {
-    if (Test-Path -LiteralPath $candidate -PathType Container) {
-        $report.equalizerApo.installed = $true
-        $report.equalizerApo.installPath = $candidate
-        $configurator = Join-Path $candidate 'Configurator.exe'
-        $configPath = Join-Path $candidate 'config'
-        if (Test-Path -LiteralPath $configurator) { $report.equalizerApo.configuratorPath = $configurator }
-        if (Test-Path -LiteralPath $configPath) { $report.equalizerApo.configPath = $configPath }
-        break
+$dataFile = Join-Path $PSScriptRoot '..\\..\\sonos-data.json'
+if (Test-Path -LiteralPath $dataFile -PathType Leaf) {
+    try {
+        $data = Get-Content $dataFile -Raw | ConvertFrom-Json -ErrorAction Stop
+        if ($data.'sonos-config'.host -and $data.'sonos-config'.port) {
+            $report.metadata.defaultPlaybackEndpoint = "${($data.'sonos-config'.host)}:${($data.'sonos-config'.port)}"
+        }
+    }
+    catch {
+        $report.unavailable += "sonos-data.json: $($_.Exception.Message)"
+    }
+}
+
+foreach ($candidate in @($report.equalizerApo.candidates)) {
+    if (Test-Path -LiteralPath $candidate.installPath -PathType Container) {
+        $candidate.found = $true
+        $report.equalizerApo.configuratorFound = $report.equalizerApo.configuratorFound -or (Test-Path -LiteralPath (Join-Path $candidate.installPath 'Configurator.exe') -PathType Leaf)
+        $report.equalizerApo.configDirFound = $report.equalizerApo.configDirFound -or (Test-Path -LiteralPath (Join-Path $candidate.installPath 'config') -PathType Container)
     }
 }
 
 if ($CheckLoopbackServices) {
     foreach ($port in @(3000, 5005)) {
-        $listener = Get-NetTCPConnection -State Listen -LocalPort $port -ErrorAction SilentlyContinue | Select-Object -First 1
+        $listener = Resolve-ProcessByPort -Port $port
+        $meta = $null
+        if ($listener) {
+            try {
+                $proc = Get-Process -Id $listener.OwningProcess -ErrorAction Stop
+                $meta = [ordered]@{
+                    port = $port
+                    pid = $proc.Id
+                    name = $proc.ProcessName
+                    pathHint = if ($proc.Path) { [IO.Path]::GetFileName($proc.Path) } else { $null }
+                }
+                $report.processMetadata += $meta
+            }
+            catch {
+                $report.unavailable += "port:$port:process-metadata:$($_.Exception.Message)"
+            }
+        }
         $report.listeners += [ordered]@{
             port = $port
             listening = [bool]$listener
             processId = if ($listener) { $listener.OwningProcess } else { $null }
         }
+    }
+}
+
+if (Get-Command Get-ScheduledTask -ErrorAction SilentlyContinue) {
+    $report.metadata.scheduledTaskProbed = $true
+    try {
+        $report.metadata.scheduledTaskNames = @(Get-ScheduledTask -TaskName 'Sonos*' -ErrorAction SilentlyContinue | Select-Object -ExpandProperty TaskName)
+    }
+    catch {
+        $report.unavailable += "Get-ScheduledTask: $($_.Exception.Message)"
     }
 }
 

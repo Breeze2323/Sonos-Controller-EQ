@@ -22,6 +22,19 @@ Use the Vite default port (5173) for development. Do not run a development serve
 - Local rules: `AGENTS.md`, `AUTONOMY.md`, and `docs/`.
 - Production controller, Sonos API, Windows endpoint, DSP configuration, and Sonos playback/settings are out of scope unless a later task grants exact approval.
 
+## Current milestone state
+
+Active branch: `agent/prelive-audio-control-stack` with draft PR #6.
+
+- Sonos-native control writes are policy-blocked and return preview payloads.
+- DSP writes are scoped and validated through preview/stage/apply/bypass/rollback contracts.
+- Equalizer APO behavior is explicit-path read-only probe only (`candidate_present`, `candidate_missing`), with no implicit discovery.
+- Read-only Sonos and APO readiness evidence is captured in:
+  - `docs/evidence/READ_ONLY_BEAST2_READINESS.md`
+  - `docs/evidence/READ_ONLY_SONOS_DISCOVERY.md`
+  - `docs/evidence/APO_READINESS_EXPLICIT_PATH_PROBE.md`
+  - `docs/DISPOSABLE_INTEGRATION.md`
+
 ## Upstream and attribution
 
 ```text

@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History } from 'lucide-react'
+import { LayoutGrid, Calendar, Settings, Plus, Music2, Download, History, SlidersHorizontal } from 'lucide-react'
 
 import { useProfiles } from './hooks/useProfiles'
 import { useSonosApi } from './hooks/useSonosApi'
@@ -16,6 +16,8 @@ import ProfileEditor from './components/ProfileEditor'
 import Scheduler from './components/Scheduler'
 import ConnectionConfig from './components/ConnectionConfig'
 import ActivityLog from './components/ActivityLog'
+import DspPanel from './components/DspPanel'
+import NativeControls from './components/NativeControls'
 
 // ===== Toast System =====
 let toastIdCounter = 0
@@ -124,7 +126,7 @@ export default function App() {
   const [applyingId, setApplyingId] = useState(null)
   const [liveCollapsed, setLiveCollapsed] = useState(false)
   const contentRef = useRef(null)
-  const [autoAppliedId, setAutoAppliedId] = useState(null)
+  const [autoAppliedId] = useState(null)
   const { toasts, addToast } = useToasts()
   const { entries: logEntries, addEntry, clearLog } = useActivityLog()
   // Ref always mirrors appliedProfile so callbacks don't need it in their deps
@@ -151,10 +153,7 @@ export default function App() {
     // Live send only — does NOT persist to the stored profile
     clearTimeout(subTimers.current[profile.id])
     subTimers.current[profile.id] = setTimeout(() => {
-      const base = `http://${config.host}:${config.port}`
-      const room = encodeURIComponent(config.room)
-      fetch(`/sonos-proxy?url=${encodeURIComponent(`${base}/${room}/subwoofer/${value}`)}`)
-        .catch(() => {})
+    void value
     }, 350)
   }, [config])
 
@@ -164,10 +163,7 @@ export default function App() {
     // Live send only — does NOT persist to the stored profile
     clearTimeout(volTimers.current[profile.id])
     volTimers.current[profile.id] = setTimeout(() => {
-      const base = `http://${config.host}:${config.port}`
-      const room = encodeURIComponent(config.room)
-      fetch(`/sonos-proxy?url=${encodeURIComponent(`${base}/${room}/volume/${value}`)}`)
-        .catch(() => {})
+    void value
     }, 350)
   }, [updateProfile, config])
 
@@ -205,28 +201,13 @@ export default function App() {
     if (activeProfile) handleApply(activeProfile)
   }, [activeProfile, handleApply])
 
-  const handleAutoApply = useCallback((profile, result) => {
-    if (result.ok) {
-      addEntry({
-        type: 'schedule_fired',
-        action: 'Schedule Fired',
-        what: profile.name,
-        before: appliedProfileRef.current?.name ?? null,
-        after: profile.name,
-      })
-      setActiveProfileId(profile.id)
-      setAppliedAt(Date.now())
-      setAppliedProfile(profile)
-      setAutoAppliedId(profile.id)
-      addToast(`Auto-applied: ${profile.name}`, 'info')
-    }
-  }, [setActiveProfileId, addToast, addEntry])
+  const handleSchedulePreview = useCallback((profile, result) => {
+    addEntry({ type: 'schedule_preview', action: 'Schedule preview', what: profile.name, before: null, after: result.code })
+    addToast(`Schedule for "${profile.name}" was previewed; live writes are disabled.`, 'info', 6000)
+  }, [addEntry, addToast])
 
   const handleSessionStart = useCallback((volume) => {
-    const base = `http://${config.host}:${config.port}`
-    const room = encodeURIComponent(config.room)
-    fetch(`/sonos-proxy?url=${encodeURIComponent(`${base}/${room}/volume/${volume}`)}`).catch(() => {})
-    addToast(`Session started — volume set to ${volume}`, 'info')
+    addToast(`Session start volume ${volume} previewed; live writes are disabled.`, 'info')
   }, [config, addToast])
 
   const { enabled: sessionEnabled, setEnabled: setSessionEnabled, startVolume, setStartVolume } =
@@ -274,9 +255,7 @@ export default function App() {
 
   const { schedules, addSchedule, updateSchedule, deleteSchedule } = useScheduler({
     profiles,
-    config,
-    applyProfile,
-    onAutoApply: handleAutoApply,
+    onSchedulePreview: handleSchedulePreview,
   })
 
   const handleCaptureFromSonos = useCallback(async () => {
@@ -470,6 +449,8 @@ export default function App() {
           />
         )}
 
+        {tab === 'dsp' && <DspPanel activeProfile={activeProfile} onSaveToProfile={(dsp) => updateProfile(activeProfile.id, { dsp })} />}
+
         {/* Activity Log Tab */}
         {tab === 'log' && (
           <ActivityLog entries={logEntries} onClear={clearLog} />
@@ -534,6 +515,11 @@ export default function App() {
             </div>
 
             <div className="settings-section">
+              <div className="settings-section-title">Native Sonos capabilities</div>
+              <NativeControls room={config.room} />
+            </div>
+
+            <div className="settings-section">
               <div className="settings-section-title">About</div>
               <div
                 className="settings-card"
@@ -572,6 +558,13 @@ export default function App() {
         >
           <Calendar size={22} />
           <span className="nav-tab-label">Schedule</span>
+        </button>
+        <button
+          className={`nav-tab ${tab === 'dsp' ? 'active' : ''}`}
+          onClick={() => setTab('dsp')}
+        >
+          <SlidersHorizontal size={22} />
+          <span className="nav-tab-label">DSP</span>
         </button>
         <button
           className={`nav-tab ${tab === 'log' ? 'active' : ''}`}

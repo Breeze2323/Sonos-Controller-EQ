@@ -1,9 +1,5 @@
 import { useState, useCallback } from 'react'
 
-function boolToOnOff(val) {
-  return val ? 'on' : 'off'
-}
-
 /**
  * Routes all Sonos API calls through the Vite dev-server proxy at /sonos-proxy.
  * This avoids CORS entirely — the browser calls localhost, Node.js forwards
@@ -65,50 +61,9 @@ export function useSonosApi() {
 
   const applyProfile = useCallback(async (config, profile) => {
     setApplying(true)
-    const base = buildBase(config)
-    const room = encodeURIComponent(config.room)
-
-    const commands = [
-      `${base}/${room}/volume/${profile.volume}`,
-      `${base}/${room}/bass/${profile.bass}`,
-      `${base}/${room}/treble/${profile.treble}`,
-      `${base}/${room}/nightmode/${boolToOnOff(profile.nightMode)}`,
-      `${base}/${room}/speechenhancement/${boolToOnOff(profile.speechEnhancement)}`,
-      `${base}/${room}/sub/${profile.subwooferEnabled !== false ? 'on' : 'off'}`,
-      ...(profile.subwooferEnabled !== false
-        ? [`${base}/${room}/sub/gain/${profile.subwooferGain}`]
-        : []),
-    ]
-
-    const settled = await Promise.allSettled(commands.map(url => apiGet(url)))
-    const results = settled.map((outcome, i) => {
-      if (outcome.status === 'fulfilled') {
-        const res = outcome.value
-        return { url: commands[i], ok: res.ok || res.status < 500, status: res.status }
-      }
-      return { url: commands[i], ok: false, error: outcome.reason?.message }
-    })
-
+    void config
     setApplying(false)
-
-    const failures = results.filter((r) => !r.ok)
-    if (failures.length > 0 && failures.length === results.length) {
-      return {
-        ok: false,
-        message: `All commands failed — check Settings and confirm the API is reachable.`,
-        results,
-      }
-    }
-    if (failures.length > 0) {
-      return {
-        ok: true,
-        partial: true,
-        message: `Applied with ${failures.length} warning(s) — some commands may not be supported by your setup.`,
-        results,
-      }
-    }
-
-    return { ok: true, message: `"${profile.name}" applied successfully`, results }
+    return { ok: false, previewOnly: true, code: 'LIVE_SONOS_WRITES_DISABLED', message: `"${profile.name}" was previewed; live Sonos writes are disabled.`, results: [], liveAudioProcessed: false }
   }, [])
 
   const fetchCurrentSettings = useCallback(async (config) => {

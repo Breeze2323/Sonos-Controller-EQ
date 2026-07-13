@@ -46,3 +46,14 @@ test('scoped Sonos and DSP routes expose policy-blocked writes', async t => {
   const dsp = await fetch(`http://127.0.0.1:${port}/api/dsp/validate`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ schemaVersion: 1, enabled: true, preampDb: -3, graphicEq: { bands: [] }, parametricEq: { filters: [] } }) })
   assert.equal((await dsp.json()).ok, true)
 })
+
+test('REW parser route previews filters without applying audio changes', async t => {
+  const server = createControllerServer()
+  const port = await listen(server); t.after(() => server.close())
+  const response = await fetch(`http://127.0.0.1:${port}/api/rew/parse`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ text: 'Preamp: -4 dB\nFilter 1: ON PK Fc 100 Hz Gain 3 dB Q 1.4' }) })
+  const result = await response.json()
+  assert.equal(result.ok, true)
+  assert.equal(result.applied, false)
+  assert.equal(result.liveAudioProcessed, false)
+  assert.equal(result.filters[0].frequencyHz, 100)
+})
