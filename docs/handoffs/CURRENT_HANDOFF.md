@@ -12,6 +12,7 @@ Updated: 2026-07-13T04:10:00-06:00
 - Subsequent pushed checkpoints: `cebd218` (separate staging), `623c87a` (DSP panel), `2029318` (REW preview API), `f5714f3` (REW UI preview), and `feb11f7` (validated Sonos controls).
 - Latest implementation checkpoints: `ccfd7cf` (parametric/presets/A-B/source UI), `fb3afae` (read-only capability view), `02edad0` (preview-only scheduler), `8681cdf` (REW audit persistence), and `f61a78b` (save DSP draft to unified profile).
 - Latest safety checkpoints: `74b6d22` makes inherited quick-control, transport, grouping, session, and slider actions preview-only; `12af627` makes the legacy bulk profile-apply hook return a structured preview-only block with no network requests.
+- Latest validation checkpoints: `372c591` adds Vitest/jsdom UI coverage and includes it in `npm run check`; `b470050` adds an explicit-path, read-only Equalizer APO readiness probe.
 - Draft PR: [#5](https://github.com/Breeze2323/Sonos-Controller-EQ/pull/5), targeting `main`
 - Exact-head CI: `fb3afae` is green on Ubuntu/Windows and Node 20/22. CI for `8681cdf` and `f61a78b` is pending GitHub completion.
 - Worktree was clean before the profile-migration checkpoint.
