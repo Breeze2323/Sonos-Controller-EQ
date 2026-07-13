@@ -458,7 +458,7 @@ export default function App() {
           />
         )}
 
-        {tab === 'dsp' && <DspPanel />}
+        {tab === 'dsp' && <DspPanel activeProfile={activeProfile} onSaveToProfile={(dsp) => updateProfile(activeProfile.id, { dsp })} />}
 
         {/* Activity Log Tab */}
         {tab === 'log' && (

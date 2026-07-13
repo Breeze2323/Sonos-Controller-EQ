@@ -21,7 +21,7 @@ async function post(path, body) {
   return response.json()
 }
 
-export default function DspPanel() {
+export default function DspPanel({ activeProfile, onSaveToProfile }) {
   const [configuration, setConfiguration] = useState(initialConfiguration)
   const [mode, setMode] = useState(15)
   const [result, setResult] = useState(null)
@@ -57,6 +57,16 @@ export default function DspPanel() {
   const updateFilter = (index, updates) => setConfiguration((current) => ({ ...current, parametricEq: { filters: current.parametricEq.filters.map((filter, filterIndex) => filterIndex === index ? { ...filter, ...updates } : filter) } }))
   const deleteFilter = (index) => setConfiguration((current) => ({ ...current, parametricEq: { filters: current.parametricEq.filters.filter((_, filterIndex) => filterIndex !== index) } }))
   const loadPreset = (name) => setConfiguration(PRESETS[name]())
+  const saveToProfile = () => {
+    if (!activeProfile || !onSaveToProfile) return
+    onSaveToProfile({
+      ...configuration,
+      sourceCoverage: { ...DEFAULT_SOURCE_COVERAGE },
+      rewImportHash: rewAudit.at(-1)?.importHash ?? null,
+      updatedAt: new Date().toISOString(),
+    })
+    setResult({ ok: true, profileSaved: activeProfile.id, applied: false, liveAudioProcessed: false })
+  }
 
   return (
     <section className="settings-page" aria-label="DSP equalizer">
@@ -73,6 +83,7 @@ export default function DspPanel() {
           <div aria-live="polite" style={{ fontSize: 12, color: headroom.sufficient ? 'var(--success, #4caf50)' : 'var(--warning, #e6a23c)' }}>Headroom: {headroom.sufficient ? 'sufficient' : 'reduce preamp'}; recommended {headroom.recommendedPreampDb} dB; clipping risk {response.clippingRisk}.</div>
           <div role="img" aria-label="Estimated EQ response" style={{ display: 'flex', alignItems: 'end', height: 76, gap: 2, borderBottom: '1px solid var(--border)' }}>{response.points.map((point) => <span key={point.frequencyHz} title={`${point.frequencyHz} Hz: ${point.magnitudeDb.toFixed(1)} dB`} style={{ flex: 1, height: `${Math.min(100, Math.abs(point.magnitudeDb) * 7 + 2)}%`, background: point.magnitudeDb >= 0 ? 'var(--accent-primary)' : 'var(--text-muted)', opacity: 0.75 }} />)}</div>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><button className="btn btn-secondary" onClick={stage}>Stage safely</button><button className="btn btn-primary" onClick={applySandbox}>Apply to sandbox/mock</button><button className="btn btn-secondary" onClick={toggleBypass}>Bypass sandbox/mock</button></div>
+          <button className="btn btn-secondary" disabled={!activeProfile} onClick={saveToProfile}>{activeProfile ? `Save draft to ${activeProfile.name}` : 'Select an active profile to save draft'}</button>
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}><span style={{ fontSize: 12 }}>Presets:</span>{Object.keys(PRESETS).map((name) => <button key={name} className="btn btn-secondary" onClick={() => loadPreset(name)}>{name}</button>)}<button className="btn btn-secondary" onClick={() => setSlotA(structuredClone(configuration))}>Save A</button><button className="btn btn-secondary" onClick={() => setSlotB(structuredClone(configuration))}>Save B</button><button className="btn btn-secondary" disabled={!slotA} onClick={() => setConfiguration(structuredClone(slotA))}>Load A</button><button className="btn btn-secondary" disabled={!slotB} onClick={() => setConfiguration(structuredClone(slotB))}>Load B</button></div>
           {result && <pre style={{ whiteSpace: 'pre-wrap', fontSize: 11, margin: 0 }}>{JSON.stringify(result, null, 2)}</pre>}
         </div>
